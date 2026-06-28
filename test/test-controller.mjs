@@ -133,6 +133,8 @@ console.log('BrightnessAction:');
 
 function fakeUD() {
   return { icons: [], alerts: 0, logs: [],
+    setBaseDataIcon(ctx, data, text) { this.icons.push({ data, text }); },
+    setStateIcon(ctx, state, text) { this.icons.push({ state, text }); },
     setPathIcon(ctx, path, text) { this.icons.push({ path, text }); },
     showAlert() { this.alerts++; },
     logMessage(m, l) { this.logs.push([l, m]); } };

@@ -6,9 +6,28 @@
 //   monitor   : "auto" | "<index>"        (DDC/CI monitor target, default auto)
 //   showValue : "on" | undefined          (briefly show the new % on the key, default on)
 
+import { readFileSync } from 'fs';
+import { fileURLToPath } from 'url';
+
 const VALID_STEPS = [1, 3, 5, 10];
 const DEFAULT_STEP = 5;
 const VALUE_DISPLAY_MS = 1500;
+
+// Bundled icons are embedded as base64 data URIs and pushed with setBaseDataIcon.
+// This is the path-independent method used by the official demos; passing a
+// plugin-relative path to setPathIcon does NOT resolve on the host and blanks the key.
+function loadDataUri(relToThisFile) {
+  try {
+    const p = fileURLToPath(new URL(relToThisFile, import.meta.url));
+    return 'data:image/png;base64,' + readFileSync(p).toString('base64');
+  } catch {
+    return null;
+  }
+}
+const ICON_DATA = {
+  brighter: loadDataUri('../../assets/icons/brighter.png'),
+  darker: loadDataUri('../../assets/icons/darker.png'),
+};
 
 export default class BrightnessAction {
   constructor(context, $UD, controller, direction) {
@@ -16,8 +35,7 @@ export default class BrightnessAction {
     this.$UD = $UD;
     this.controller = controller;
     this.direction = direction >= 0 ? 1 : -1;
-    // Plugin-root-relative path (leading "/" per the setPathIcon convention).
-    this.iconPath = this.direction > 0 ? '/assets/icons/brighter.png' : '/assets/icons/darker.png';
+    this.iconData = this.direction > 0 ? ICON_DATA.brighter : ICON_DATA.darker;
 
     this.step = DEFAULT_STEP;
     this.monitor = 'auto';
@@ -72,14 +90,22 @@ export default class BrightnessAction {
 
   // ---- icon helpers --------------------------------------------------------
 
+  // Render our sun icon with optional overlay text. Prefer embedded base64
+  // (reliable everywhere); fall back to the manifest state icon if the file
+  // could not be read for some reason.
+  _setIcon(text) {
+    if (this.iconData) this.$UD.setBaseDataIcon(this.context, this.iconData, text);
+    else this.$UD.setStateIcon(this.context, 0, text);
+  }
+
   _showBaseIcon() {
     if (this.revertTimer) { clearTimeout(this.revertTimer); this.revertTimer = null; }
-    this.$UD.setPathIcon(this.context, this.iconPath, '');
+    this._setIcon('');
   }
 
   _flashValue(current) {
     if (typeof current !== 'number' || current < 0) return;
-    this.$UD.setPathIcon(this.context, this.iconPath, `${current}%`);
+    this._setIcon(`${current}%`);
     if (this.revertTimer) clearTimeout(this.revertTimer);
     this.revertTimer = setTimeout(() => this._showBaseIcon(), VALUE_DISPLAY_MS);
   }
