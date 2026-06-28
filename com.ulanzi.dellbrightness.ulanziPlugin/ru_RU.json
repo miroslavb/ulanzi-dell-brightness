@@ -1,0 +1,17 @@
+{
+  "Name": "Яркость монитора Dell",
+  "Description": "Управление яркостью Dell U2720Q (или любого монитора с DDC/CI) прямо с деки Ulanzi.",
+  "Actions": [
+    { "Name": "Ярче", "Tooltip": "Увеличить яркость монитора" },
+    { "Name": "Темнее", "Tooltip": "Уменьшить яркость монитора" }
+  ],
+  "Localization": {
+    "Brightness step": "Шаг яркости",
+    "Monitor": "Монитор",
+    "Auto (first responsive monitor)": "Авто (первый отвечающий монитор)",
+    "Show value on key": "Показывать значение на кнопке",
+    "Refresh monitors": "Обновить список мониторов",
+    "Current": "Текущая",
+    "DdcHint": "Яркость управляется по DDC/CI (VCP 0x10) — тот же канал, что использует Dell Display Manager. В меню монитора (OSD) должен быть включён DDC/CI."
+  }
+}

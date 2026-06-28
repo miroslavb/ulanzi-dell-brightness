@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport"
+        content="width=device-width,initial-scale=1,maximum-scale=1,minimum-scale=1,user-scalable=no,minimal-ui,viewport-fit=cover" />
+  <title>Dell Monitor Brightness</title>
+  <link rel="stylesheet" href="../libs/css/uspi.css">
+  <style>
+    .uspi-item-label { width: 116px; }
+    .hint { padding: 4px 12px 8px; color: #969696; font-size: 11px; line-height: 1.4; }
+    .reading { padding: 0 12px 6px; color: #cfcfcf; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <div class="uspi-wrapper hidden">
+    <form id="property-inspector">
+
+      <div class="uspi-item">
+        <div class="uspi-item-label" data-localize="Brightness step">Brightness step</div>
+        <select class="uspi-item-value select" name="step" id="step">
+          <option value="1">1%</option>
+          <option value="3">3%</option>
+          <option value="5" selected>5%</option>
+          <option value="10">10%</option>
+        </select>
+      </div>
+
+      <div class="uspi-item">
+        <div class="uspi-item-label" data-localize="Monitor">Monitor</div>
+        <select class="uspi-item-value select" name="monitor" id="monitor">
+          <option value="auto" data-localize="Auto (first responsive monitor)">Auto (first responsive monitor)</option>
+        </select>
+      </div>
+
+      <div class="reading" id="reading"></div>
+
+      <div class="uspi-item">
+        <div class="uspi-item-label" data-localize="Show value on key">Show value on key</div>
+        <div class="uspi-item-value">
+          <div class="uspi-item-child" style="margin-top:-1px;">
+            <input id="showValue" name="showValue" type="checkbox" value="on" checked>
+            <label for="showValue" class="uspi-item-label"><span></span></label>
+          </div>
+        </div>
+      </div>
+
+      <div class="uspi-item">
+        <div class="uspi-item-label">&nbsp;</div>
+        <button type="button" class="uspi-item-value" id="refresh" data-localize="Refresh monitors">Refresh monitors</button>
+      </div>
+
+      <div class="hint" data-localize="DdcHint">
+        Brightness is controlled over DDC/CI (VCP 0x10), the same channel Dell Display Manager uses.
+        The monitor must have DDC/CI enabled in its OSD menu.
+      </div>
+
+    </form>
+  </div>
+
+  <script src="../libs/js/constants.js"></script>
+  <script src="../libs/js/eventEmitter.js"></script>
+  <script src="../libs/js/timers.js"></script>
+  <script src="../libs/js/utils.js"></script>
+  <script src="../libs/js/ulanziApi.js"></script>
+
+  <script src="./inspector.js"></script>
+</body>
+</html>

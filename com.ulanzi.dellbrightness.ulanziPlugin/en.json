@@ -1,0 +1,17 @@
+{
+  "Name": "Dell Monitor Brightness",
+  "Description": "Adjust a Dell U2720Q (or any DDC/CI monitor) brightness from your Ulanzi Deck.",
+  "Actions": [
+    { "Name": "Brighter", "Tooltip": "Increase monitor brightness" },
+    { "Name": "Darker", "Tooltip": "Decrease monitor brightness" }
+  ],
+  "Localization": {
+    "Brightness step": "Brightness step",
+    "Monitor": "Monitor",
+    "Auto (first responsive monitor)": "Auto (first responsive monitor)",
+    "Show value on key": "Show value on key",
+    "Refresh monitors": "Refresh monitors",
+    "Current": "Current",
+    "DdcHint": "Brightness is controlled over DDC/CI (VCP 0x10), the same channel Dell Display Manager uses. The monitor must have DDC/CI enabled in its OSD menu."
+  }
+}
