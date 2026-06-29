@@ -44,7 +44,10 @@ export default class BrightnessAction {
     this.active = true;
     this.revertTimer = null;
 
-    this._showBaseIcon();
+    // Intentionally do NOT paint an icon on creation. The host already renders
+    // the key's configured image — the manifest default state icon, or the
+    // user's own custom icon if they set one. Painting here would overwrite a
+    // user-chosen custom icon the moment the action is (re)added.
   }
 
   updateSettings(settings = {}) {
@@ -62,8 +65,12 @@ export default class BrightnessAction {
   }
 
   setActive(active) {
+    // Track visibility only. We deliberately do NOT repaint the base icon when
+    // the key's screen becomes active again: the host re-renders the key's
+    // configured image (a custom icon included) by itself on every screen
+    // switch. Repainting here is exactly what used to reset a user's custom
+    // icon back to the plugin default on each switch.
     this.active = !!active;
-    if (this.active) this._showBaseIcon();
   }
 
   async run() {
@@ -98,6 +105,11 @@ export default class BrightnessAction {
     else this.$UD.setStateIcon(this.context, 0, text);
   }
 
+  // Revert target after a value flash. This is the ONLY place that paints the
+  // plugin's own icon, and it runs only after a key press (never on add or
+  // screen switch). If the user set a custom icon, it is briefly replaced by
+  // the default while the flash is showing and is restored by the host on the
+  // next screen switch.
   _showBaseIcon() {
     if (this.revertTimer) { clearTimeout(this.revertTimer); this.revertTimer = null; }
     this._setIcon('');

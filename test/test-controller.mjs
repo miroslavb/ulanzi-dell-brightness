@@ -191,6 +191,21 @@ await test('value flash is shown then reverted to the base icon', async () => {
   a.destroy();
 });
 
+await test('constructor does not paint an icon (host renders configured/custom image)', async () => {
+  const ud = fakeUD();
+  // eslint-disable-next-line no-new
+  new BrightnessAction('c___k___a.brighter', ud, fakeController({ ok: true }), 1);
+  assert.strictEqual(ud.icons.length, 0, 'creating the action must not push any icon');
+});
+
+await test('setActive does not repaint — custom icon survives a screen switch', async () => {
+  const ud = fakeUD();
+  const a = new BrightnessAction('c___k___a.brighter', ud, fakeController({ ok: true }), 1);
+  a.setActive(false);   // screen hidden
+  a.setActive(true);    // screen shown again (the event that used to reset the icon)
+  assert.strictEqual(ud.icons.length, 0, 'setActive must never push an icon');
+});
+
 // ---- direction detection (mirrors app.js) ----------------------------------
 
 console.log('direction detection:');

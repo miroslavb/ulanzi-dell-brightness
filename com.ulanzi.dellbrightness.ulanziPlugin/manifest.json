@@ -3,7 +3,7 @@
   "Name": "Dell Monitor Brightness",
   "Description": "Adjust the brightness of a Dell U2720Q (or any DDC/CI monitor) straight from your Ulanzi Deck — a lightweight replacement for Dell Display Manager. Add a 'Brighter' and a 'Darker' key and pick the step (1 / 3 / 5 / 10) in the action settings.",
   "Icon": "assets/icons/pluginIcon.png",
-  "Version": "1.0.1",
+  "Version": "1.0.2",
   "Category": "Monitor Brightness",
   "CategoryIcon": "assets/icons/categoryIcon.png",
   "CodePath": "plugin/app.js",
