@@ -9,7 +9,6 @@
     "Brightness step": "Brightness step",
     "Monitor": "Monitor",
     "Auto (first responsive monitor)": "Auto (first responsive monitor)",
-    "Show value on key": "Show value on key",
     "Refresh monitors": "Refresh monitors",
     "Current": "Current",
     "DdcHint": "Brightness is controlled over DDC/CI (VCP 0x10), the same channel Dell Display Manager uses. The monitor must have DDC/CI enabled in its OSD menu."

@@ -9,7 +9,6 @@
     "Brightness step": "Helligkeitsschritt",
     "Monitor": "Monitor",
     "Auto (first responsive monitor)": "Automatisch (erster reagierender Monitor)",
-    "Show value on key": "Wert auf der Taste anzeigen",
     "Refresh monitors": "Monitore aktualisieren",
     "Current": "Aktuell",
     "DdcHint": "Die Helligkeit wird über DDC/CI (VCP 0x10) gesteuert – derselbe Kanal, den der Dell Display Manager nutzt. DDC/CI muss im OSD-Menü des Monitors aktiviert sein."

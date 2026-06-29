@@ -1,6 +1,6 @@
 {
   "name": "com.ulanzi.dellbrightness",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "private": true,
   "description": "Ulanzi Deck plugin: control Dell U2720Q (DDC/CI) monitor brightness.",
   "type": "module",

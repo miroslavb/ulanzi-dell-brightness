@@ -5,6 +5,20 @@ All notable changes to the **Dell Monitor Brightness** Ulanzi Deck plugin.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.0.3] - 2026-06-29
+
+### Changed
+- **The plugin no longer draws anything on the key — custom icons are now fully
+  preserved, including right after a press.** v1.0.2 stopped the repaint on add
+  and screen switch, but a key press still flashed the new brightness % over the
+  plugin's default icon and then reverted to that default, so a custom icon was
+  replaced until the next screen switch. The Ulanzi SDK exposes no way to read a
+  key's configured image back, so there is no way to restore a custom icon after
+  painting over it. The on-key value flash (and its **"Show value on key"**
+  Property Inspector option) has therefore been removed: the action only sends
+  the DDC/CI brightness command and shows the host's built-in alert on failure.
+  The brightness change is visible on the monitor itself.
+
 ## [1.0.2] - 2026-06-29
 
 ### Fixed

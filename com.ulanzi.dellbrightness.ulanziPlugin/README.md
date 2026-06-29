@@ -12,8 +12,8 @@ Add two keys to your deck:
 | **Darker**  | sun with **short** rays 🔅 | decrease brightness by *step* |
 
 The brightness **step (1 / 3 / 5 / 10 %)** is chosen in each key's settings (Property
-Inspector). You can also pick which monitor to control and whether the new value is
-briefly shown on the key.
+Inspector), along with which monitor to control. The plugin never draws over the
+key, so any custom icon you set in Ulanzi Studio is kept.
 
 ---
 
@@ -58,8 +58,11 @@ No third-party tools (ControlMyMonitor, nircmd, …) and no Node install are req
 - **Monitor** — `Auto (first responsive monitor)` or a specific monitor from the list.
   Click **Refresh monitors** after plugging/unplugging a display. The list shows the
   current % of each DDC/CI-capable monitor; non-capable panels are marked `— no DDC/CI`.
-- **Show value on key** — briefly overlays the new brightness (e.g. `65%`) on the key
-  after each press.
+
+> The plugin intentionally does not draw a value on the key. Painting on the key
+> would overwrite a custom icon you set in Ulanzi Studio (the SDK gives no way to
+> read that icon back to restore it), so your chosen icon is always preserved. The
+> brightness change is visible on the monitor itself.
 
 ## How it works
 

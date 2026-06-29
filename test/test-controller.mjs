@@ -147,7 +147,7 @@ await test('brighter sends +step, darker sends -step, with configured monitor', 
   const ud = fakeUD();
   const ctl = fakeController({ ok: true, current: 65 });
   const up = new BrightnessAction('ctx___k___a.brighter', ud, ctl, 1);
-  up.updateSettings({ step: '10', monitor: '0', showValue: 'on' });
+  up.updateSettings({ step: '10', monitor: '0' });
   await up.run();
   assert.deepStrictEqual(ctl.calls.at(-1), { monitor: '0', delta: 10 });
 
@@ -166,15 +166,6 @@ await test('invalid step falls back to default 5', async () => {
   assert.strictEqual(ctl.calls.at(-1).delta, 5);
 });
 
-await test('showValue defaults on before config, off when unchecked after config', async () => {
-  const a = new BrightnessAction('c___k___a.brighter', fakeUD(), fakeController({ ok: true }), 1);
-  assert.strictEqual(a.showValue, true);                 // brand new
-  a.updateSettings({ step: '5', monitor: 'auto' });       // configured, checkbox absent => off
-  assert.strictEqual(a.showValue, false);
-  a.updateSettings({ step: '5', monitor: 'auto', showValue: 'on' });
-  assert.strictEqual(a.showValue, true);
-});
-
 await test('failed adjust shows an alert on the key', async () => {
   const ud = fakeUD();
   const a = new BrightnessAction('c___k___a.brighter', ud, fakeController({ ok: false, error: 'boom' }), 1);
@@ -182,12 +173,12 @@ await test('failed adjust shows an alert on the key', async () => {
   assert.strictEqual(ud.alerts, 1);
 });
 
-await test('value flash is shown then reverted to the base icon', async () => {
+await test('a successful press paints no icon — custom icon is preserved', async () => {
   const ud = fakeUD();
   const a = new BrightnessAction('c___k___a.brighter', ud, fakeController({ ok: true, current: 42 }), 1);
-  a.updateSettings({ step: '5', monitor: 'auto', showValue: 'on' });
+  a.updateSettings({ step: '5', monitor: 'auto' });
   await a.run();
-  assert.ok(ud.icons.some((i) => i.text === '42%'), 'should flash 42%');
+  assert.strictEqual(ud.icons.length, 0, 'run() must never push an icon on success');
   a.destroy();
 });
 

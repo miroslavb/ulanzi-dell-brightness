@@ -9,7 +9,6 @@
     "Brightness step": "Шаг яркости",
     "Monitor": "Монитор",
     "Auto (first responsive monitor)": "Авто (первый отвечающий монитор)",
-    "Show value on key": "Показывать значение на кнопке",
     "Refresh monitors": "Обновить список мониторов",
     "Current": "Текущая",
     "DdcHint": "Яркость управляется по DDC/CI (VCP 0x10) — тот же канал, что использует Dell Display Manager. В меню монитора (OSD) должен быть включён DDC/CI."
