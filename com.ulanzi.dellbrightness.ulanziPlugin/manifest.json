@@ -3,7 +3,7 @@
   "Name": "Dell Monitor Brightness",
   "Description": "Adjust any DDC/CI monitor from Ulanzi keys or a D200X encoder, with selectable MDI icons.",
   "Icon": "assets/icons/pluginIcon.png",
-  "Version": "1.1.1",
+  "Version": "1.1.2",
   "Category": "Monitor Brightness",
   "CategoryIcon": "assets/icons/categoryIcon.png",
   "CodePath": "plugin/app.js",
@@ -46,16 +46,11 @@
       "Name": "Brightness Encoder",
       "Icon": "assets/icons/brighter.png",
       "PropertyInspectorPath": "property-inspector/inspector.html",
-      "state": 0,
       "States": [
         { "Name": "Brightness", "Image": "assets/icons/brighter.png" }
       ],
-      "Tooltip": "Turn to adjust monitor brightness",
       "UUID": "com.ulanzi.ulanzistudio.dellbrightness.encoder",
-      "SupportedInMultiActions": false,
-      "DisableAutomaticStates": true,
       "Controllers": ["Encoder"],
-      "Devices": [],
       "Encoder": { "layout": "$UA1" }
     }
   ],

@@ -239,14 +239,18 @@ await test('context string decides brighter (+1) vs darker (-1)', async () => {
   assert.strictEqual(directionFor({ context: 'com.ulanzi.ulanzistudio.dellbrightness.encoder___3___z' }), 0);
 });
 
-await test('manifest exposes encoder without a device filter', async () => {
+await test('manifest exposes encoder with the minimal known-working Studio shape', async () => {
   const manifest = JSON.parse(fs.readFileSync(new URL(
     '../com.ulanzi.dellbrightness.ulanziPlugin/manifest.json', import.meta.url
   ), 'utf8'));
   const action = manifest.Actions.find(item => item.UUID.endsWith('.encoder'));
   assert.deepStrictEqual(action.Controllers, ['Encoder']);
-  assert.ok(!action.Devices || action.Devices.length === 0,
-    'D200X Studio must discover the encoder action without a Devices filter');
+  assert.ok(!Object.hasOwn(action, 'Devices'),
+    'D200X Studio requires Devices to be omitted, not an empty array');
+  for (const optional of ['state', 'SupportedInMultiActions', 'DisableAutomaticStates']) {
+    assert.ok(!Object.hasOwn(action, optional),
+      `encoder manifest must omit optional field ${optional}`);
+  }
   assert.strictEqual(action.Encoder.layout, '$UA1');
 });
 

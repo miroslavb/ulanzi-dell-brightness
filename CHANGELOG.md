@@ -5,6 +5,14 @@ All notable changes to the **Dell Monitor Brightness** Ulanzi Deck plugin.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.1.2] - 2026-09-03
+
+### Fixed
+- The D200X encoder action now uses the exact minimal manifest shape proven by
+  HA Hub's working encoder actions. In particular, `Devices` is omitted rather
+  than set to an empty array; D200X Studio treated those forms differently and
+  hid the Dell action from the encoder tab.
+
 ## [1.1.1] - 2026-09-03
 
 ### Fixed
