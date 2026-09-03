@@ -1,18 +1,15 @@
 // BrightnessAction — one instance per key placed on the deck.
 //
-// direction: +1 for the "Brighter" action, -1 for "Darker".
+// direction: +1 for the "Brighter" action, -1 for "Darker", 0 for an encoder.
 // Settings (from the Property Inspector):
 //   step    : "1" | "3" | "5" | "10"   (percentage points per press, default 5)
 //   monitor : "auto" | "<index>"        (DDC/CI monitor target, default auto)
 //
-// The action NEVER paints the key icon. The manifest defines the default state
-// image, and the host renders the key's configured image — the default, or a
-// custom icon the user picked in Ulanzi Studio. Painting from the plugin (on
-// add, on screen activation, or to flash the new %) overwrites that custom
-// icon, and the SDK provides no way to read the configured image back to
-// restore it afterwards. So the key's appearance is left entirely to the host;
-// we only react to presses. The brightness change is visible on the monitor
-// itself, so no on-key value readout is shown.
+// Keypad actions keep the old non-painting behaviour unless the user explicitly
+// selects an MDI icon. The encoder always renders feedback because D200X's dial
+// area needs an icon/value supplied by the action.
+
+import { BRIGHTNESS_ICONS, DEFAULT_BRIGHTNESS_ICON, brightnessIconDataUri } from '../icons.js';
 
 const VALID_STEPS = [1, 3, 5, 10];
 const DEFAULT_STEP = 5;
@@ -22,13 +19,14 @@ export default class BrightnessAction {
     this.context = context;
     this.$UD = $UD;
     this.controller = controller;
-    this.direction = direction >= 0 ? 1 : -1;
+    this.direction = direction === 0 ? 0 : (direction > 0 ? 1 : -1);
+    this.isEncoder = this.direction === 0;
 
     this.step = DEFAULT_STEP;
     this.monitor = 'auto';
+    this.icon = '';
     this.active = true;
-
-    // Deliberately no icon paint here — see the file header.
+    this.renderSequence = 0;
   }
 
   updateSettings(settings = {}) {
@@ -37,18 +35,30 @@ export default class BrightnessAction {
 
     this.monitor = (settings.monitor === undefined || settings.monitor === null || settings.monitor === '')
       ? 'auto' : String(settings.monitor);
+
+    const icon = String(settings.icon || '').replace(/^mdi:/, '');
+    this.icon = BRIGHTNESS_ICONS[icon] ? icon : '';
+    if (this.isEncoder || this.icon) void this.refreshIcon();
   }
 
-  // Track visibility only. We never repaint when the key's screen becomes
-  // active again: the host re-renders the key's configured image (a custom
-  // icon included) by itself. Repainting here was what reset custom icons on
-  // every screen switch.
+  // With the default empty icon we only track visibility and let Studio restore
+  // its own configured image. An explicitly selected MDI icon, and every dial
+  // feedback tile, are intentionally repainted when their page becomes active.
   setActive(active) {
     this.active = !!active;
+    if (this.active && (this.isEncoder || this.icon)) void this.refreshIcon();
   }
 
   async run() {
-    const delta = this.direction * this.step;
+    if (this.isEncoder) {
+      await this.refreshIcon();
+      return;
+    }
+    await this.adjust(this.direction);
+  }
+
+  async adjust(direction) {
+    const delta = (direction < 0 ? -1 : 1) * this.step;
     let res;
     try {
       res = await this.controller.requestAdjust(this.monitor, delta);
@@ -59,11 +69,33 @@ export default class BrightnessAction {
     if (!res || !res.ok) {
       this.$UD.logMessage(`brightness adjust failed: ${res && res.error}`, 'error');
       this.$UD.showAlert(this.context);
+      return res;
     }
-    // On success: no on-key feedback on purpose. Drawing the new % would wipe
-    // the user's custom key icon, and the brightness change is already visible
-    // on the monitor.
+    if (this.isEncoder || this.icon) this.paintIcon(res.current);
+    return res;
   }
 
-  destroy() {}
+  async refreshIcon() {
+    if (!this.isEncoder && !this.icon) return;
+    const sequence = ++this.renderSequence;
+    let res;
+    try {
+      res = await this.controller.get(this.monitor);
+    } catch (e) {
+      res = null;
+    }
+    if (sequence !== this.renderSequence || !this.active) return;
+    this.paintIcon(res && res.ok ? res.current : null);
+  }
+
+  paintIcon(current) {
+    const icon = this.icon || DEFAULT_BRIGHTNESS_ICON;
+    const data = brightnessIconDataUri(icon, current, { showValue: this.isEncoder });
+    this.$UD.setBaseDataIcon(this.context, data, '');
+  }
+
+  onDialRotateLeft() { return this.adjust(-1); }
+  onDialRotateRight() { return this.adjust(1); }
+
+  destroy() { this.renderSequence++; }
 }

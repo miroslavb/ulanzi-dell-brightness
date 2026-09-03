@@ -3,10 +3,13 @@
   "Description": "Управление яркостью Dell U2720Q (или любого монитора с DDC/CI) прямо с деки Ulanzi.",
   "Actions": [
     { "Name": "Ярче", "Tooltip": "Увеличить яркость монитора" },
-    { "Name": "Темнее", "Tooltip": "Уменьшить яркость монитора" }
+    { "Name": "Темнее", "Tooltip": "Уменьшить яркость монитора" },
+    { "Name": "Энкодер яркости", "Tooltip": "Поверните для изменения яркости монитора" }
   ],
   "Localization": {
     "Brightness step": "Шаг яркости",
+    "Icon": "Иконка",
+    "Keep Studio icon": "Оставить иконку Studio",
     "Monitor": "Монитор",
     "Auto (first responsive monitor)": "Авто (первый отвечающий монитор)",
     "Refresh monitors": "Обновить список мониторов",

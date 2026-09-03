@@ -2,8 +2,9 @@
 
 An **Ulanzi Deck** plugin that controls the brightness of a **Dell U2720Q** (or any
 DDC/CI monitor) from your deck — a lightweight replacement for the brightness slider in
-*Dell Display Manager*. Two keys: **Brighter** (sun with long rays) and **Darker** (sun
-with short rays); the step (1 / 3 / 5 / 10 %) is chosen per key in the settings.
+*Dell Display Manager*. Use **Brighter** / **Darker** keys or the D200X
+**Brightness Encoder**; the step (1 / 3 / 5 / 10 %) and an optional MDI icon are
+chosen in the action settings.
 
 Brightness is changed over **DDC/CI** (VCP `0x10`) via the built-in Windows `dxva2.dll`
 (`Get/SetMonitorBrightness`) — no third-party tools required.
@@ -19,9 +20,11 @@ Grab the ready-built zip from the [**Releases**](../../releases) page, then:
 1. Fully quit Ulanzi Studio (tray → *Exit*).
 2. Unzip so that `com.ulanzi.dellbrightness.ulanziPlugin\` lands in
    `%APPDATA%\Ulanzi\UlanziDeck\Plugins\`.
-3. Start Ulanzi Studio, drag **Brighter** / **Darker** onto two keys, set the step.
+3. Start Ulanzi Studio. Drag **Brighter** / **Darker** onto keys and/or
+   **Brightness Encoder** onto a D200X knob, then set the step and monitor.
 
-Requires Windows 10+, Ulanzi Studio 2.1.4+, and DDC/CI enabled in the monitor's OSD.
+Requires Windows 10+, Ulanzi Studio 2.1.4+ (3.0.11+ for D200X encoders), and
+DDC/CI enabled in the monitor's OSD.
 
 ## Build from source
 

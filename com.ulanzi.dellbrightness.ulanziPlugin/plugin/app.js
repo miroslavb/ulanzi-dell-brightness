@@ -20,6 +20,7 @@ $UD.onConnected(() => $UD.logMessage('Dell Monitor Brightness plugin connected',
 
 // Derive direction from the action UUID embedded in the context (uuid___key___actionid).
 function directionFor(jsn) {
+  if (jsn && jsn.context && jsn.context.includes('.encoder')) return 0;
   return jsn && jsn.context && jsn.context.includes('.darker') ? -1 : 1;
 }
 
@@ -46,6 +47,14 @@ $UD.onAdd((jsn) => {
 
 $UD.onRun((jsn) => {
   ensureAction(jsn).run();
+});
+
+$UD.onDialRotateLeft((jsn) => {
+  ensureAction(jsn).onDialRotateLeft();
+});
+
+$UD.onDialRotateRight((jsn) => {
+  ensureAction(jsn).onDialRotateRight();
 });
 
 $UD.onSetActive((jsn) => {

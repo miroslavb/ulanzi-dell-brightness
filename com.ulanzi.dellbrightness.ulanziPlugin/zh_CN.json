@@ -3,10 +3,13 @@
   "Description": "通过 Ulanzi Deck 直接调节 Dell U2720Q（或任意支持 DDC/CI 的显示器）的亮度。",
   "Actions": [
     { "Name": "调亮", "Tooltip": "提高显示器亮度" },
-    { "Name": "调暗", "Tooltip": "降低显示器亮度" }
+    { "Name": "调暗", "Tooltip": "降低显示器亮度" },
+    { "Name": "亮度旋钮", "Tooltip": "旋转以调节显示器亮度" }
   ],
   "Localization": {
     "Brightness step": "亮度步长",
+    "Icon": "图标",
+    "Keep Studio icon": "保留 Studio 图标",
     "Monitor": "显示器",
     "Auto (first responsive monitor)": "自动（第一个可控显示器）",
     "Refresh monitors": "刷新显示器列表",

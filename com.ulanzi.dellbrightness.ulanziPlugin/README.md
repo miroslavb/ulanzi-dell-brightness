@@ -1,8 +1,8 @@
 # Dell Monitor Brightness — Ulanzi Deck plugin
 
 Control the brightness of a **Dell U2720Q** (or any DDC/CI monitor) straight from your
-**Ulanzi Deck D200H** — a lightweight replacement for the brightness slider in *Dell
-Display Manager (DDM)*.
+**Ulanzi Deck D200H/D200X** — a lightweight replacement for the brightness slider in
+*Dell Display Manager (DDM)*.
 
 Add two keys to your deck:
 
@@ -11,9 +11,13 @@ Add two keys to your deck:
 | **Brighter** | sun with **long** rays ☀ | increase brightness by *step* |
 | **Darker**  | sun with **short** rays 🔅 | decrease brightness by *step* |
 
+On D200X you can instead place **Brightness Encoder** on a knob: rotate left/right
+to dim/brighten and read the current percentage on the knob's feedback tile.
+
 The brightness **step (1 / 3 / 5 / 10 %)** is chosen in each key's settings (Property
-Inspector), along with which monitor to control. The plugin never draws over the
-key, so any custom icon you set in Ulanzi Studio is kept.
+Inspector), along with which monitor to control and an optional compact MDI icon.
+With **Keep Studio icon** (the default), keypad actions never draw over the key, so
+any custom icon you set in Ulanzi Studio is kept.
 
 ---
 
@@ -58,6 +62,8 @@ No third-party tools (ControlMyMonitor, nircmd, …) and no Node install are req
 - **Monitor** — `Auto (first responsive monitor)` or a specific monitor from the list.
   Click **Refresh monitors** after plugging/unplugging a display. The list shows the
   current % of each DDC/CI-capable monitor; non-capable panels are marked `— no DDC/CI`.
+- **Icon** — keep the Studio/manifest icon, or opt into a bundled MDI glyph. The
+  encoder always renders feedback and uses `brightness-7` when no glyph is selected.
 
 > The plugin intentionally does not draw a value on the key. Painting on the key
 > would overwrite a custom icon you set in Ulanzi Studio (the SDK gives no way to

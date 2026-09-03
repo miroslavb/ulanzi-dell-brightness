@@ -140,7 +140,12 @@ function fakeUD() {
     logMessage(m, l) { this.logs.push([l, m]); } };
 }
 function fakeController(result) {
-  return { calls: [], requestAdjust(monitor, delta) { this.calls.push({ monitor, delta }); return Promise.resolve(result); } };
+  return {
+    calls: [],
+    gets: [],
+    requestAdjust(monitor, delta) { this.calls.push({ monitor, delta }); return Promise.resolve(result); },
+    get(monitor) { this.gets.push(monitor); return Promise.resolve(result); }
+  };
 }
 
 await test('brighter sends +step, darker sends -step, with configured monitor', async () => {
@@ -197,13 +202,40 @@ await test('setActive does not repaint — custom icon survives a screen switch'
   assert.strictEqual(ud.icons.length, 0, 'setActive must never push an icon');
 });
 
+await test('an explicitly selected MDI icon is rendered on a keypad action', async () => {
+  const ud = fakeUD();
+  const a = new BrightnessAction('c___k___a.brighter', ud, fakeController({ ok: true, current: 42 }), 1);
+  a.updateSettings({ icon: 'monitor' });
+  await sleep(0);
+  assert.strictEqual(ud.icons.length, 1);
+  assert.match(ud.icons[0].data, /^data:image\/svg\+xml;base64,/);
+});
+
+await test('encoder rotation adjusts in both directions and paints live percentage', async () => {
+  const ud = fakeUD();
+  const ctl = fakeController({ ok: true, current: 55 });
+  const a = new BrightnessAction('c___dial___a.encoder', ud, ctl, 0);
+  a.updateSettings({ step: '5', monitor: '0', icon: 'brightness-7' });
+  await sleep(0);
+  await a.onDialRotateLeft();
+  await a.onDialRotateRight();
+  assert.deepStrictEqual(ctl.calls, [
+    { monitor: '0', delta: -5 },
+    { monitor: '0', delta: 5 }
+  ]);
+  const svg = Buffer.from(ud.icons.at(-1).data.split(',')[1], 'base64').toString();
+  assert.match(svg, /55%/);
+});
+
 // ---- direction detection (mirrors app.js) ----------------------------------
 
 console.log('direction detection:');
 await test('context string decides brighter (+1) vs darker (-1)', async () => {
-  const directionFor = (jsn) => (jsn && jsn.context && jsn.context.includes('.darker') ? -1 : 1);
+  const directionFor = (jsn) => jsn && jsn.context && jsn.context.includes('.encoder')
+    ? 0 : (jsn && jsn.context && jsn.context.includes('.darker') ? -1 : 1);
   assert.strictEqual(directionFor({ context: 'com.ulanzi.ulanzistudio.dellbrightness.brighter___1___x' }), 1);
   assert.strictEqual(directionFor({ context: 'com.ulanzi.ulanzistudio.dellbrightness.darker___2___y' }), -1);
+  assert.strictEqual(directionFor({ context: 'com.ulanzi.ulanzistudio.dellbrightness.encoder___3___z' }), 0);
 });
 
 console.log(`\n${passed} checks passed`);

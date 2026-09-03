@@ -3,10 +3,13 @@
   "Description": "Helligkeit eines Dell U2720Q (oder eines beliebigen DDC/CI-Monitors) direkt vom Ulanzi Deck steuern.",
   "Actions": [
     { "Name": "Heller", "Tooltip": "Monitorhelligkeit erhöhen" },
-    { "Name": "Dunkler", "Tooltip": "Monitorhelligkeit verringern" }
+    { "Name": "Dunkler", "Tooltip": "Monitorhelligkeit verringern" },
+    { "Name": "Helligkeitsregler", "Tooltip": "Drehen, um die Monitorhelligkeit anzupassen" }
   ],
   "Localization": {
     "Brightness step": "Helligkeitsschritt",
+    "Icon": "Symbol",
+    "Keep Studio icon": "Studio-Symbol beibehalten",
     "Monitor": "Monitor",
     "Auto (first responsive monitor)": "Automatisch (erster reagierender Monitor)",
     "Refresh monitors": "Monitore aktualisieren",

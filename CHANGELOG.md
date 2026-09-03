@@ -5,6 +5,15 @@ All notable changes to the **Dell Monitor Brightness** Ulanzi Deck plugin.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.1.0] - 2026-09-03
+
+### Added
+- A D200X/Dial **Brightness Encoder** action. Turn left/right to adjust the
+  selected DDC/CI monitor; its feedback tile shows the live percentage.
+- An opt-in compact MDI icon picker for all three actions. Existing keypad
+  actions still leave Ulanzi Studio's icon untouched when no plugin icon is
+  selected.
+
 ## [1.0.3] - 2026-06-29
 
 ### Changed
