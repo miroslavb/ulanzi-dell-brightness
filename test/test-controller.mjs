@@ -1,6 +1,7 @@
 // Integration test for DdcController (against the mock worker) + unit tests for
 // BrightnessAction and the app's direction detection. Runs on any OS.
 import assert from 'assert';
+import fs from 'node:fs';
 import { fileURLToPath } from 'url';
 import DdcController from '../com.ulanzi.dellbrightness.ulanziPlugin/plugin/ddc/DdcController.js';
 import BrightnessAction from '../com.ulanzi.dellbrightness.ulanziPlugin/plugin/actions/BrightnessAction.js';
@@ -236,6 +237,17 @@ await test('context string decides brighter (+1) vs darker (-1)', async () => {
   assert.strictEqual(directionFor({ context: 'com.ulanzi.ulanzistudio.dellbrightness.brighter___1___x' }), 1);
   assert.strictEqual(directionFor({ context: 'com.ulanzi.ulanzistudio.dellbrightness.darker___2___y' }), -1);
   assert.strictEqual(directionFor({ context: 'com.ulanzi.ulanzistudio.dellbrightness.encoder___3___z' }), 0);
+});
+
+await test('manifest exposes encoder without a device filter', async () => {
+  const manifest = JSON.parse(fs.readFileSync(new URL(
+    '../com.ulanzi.dellbrightness.ulanziPlugin/manifest.json', import.meta.url
+  ), 'utf8'));
+  const action = manifest.Actions.find(item => item.UUID.endsWith('.encoder'));
+  assert.deepStrictEqual(action.Controllers, ['Encoder']);
+  assert.ok(!action.Devices || action.Devices.length === 0,
+    'D200X Studio must discover the encoder action without a Devices filter');
+  assert.strictEqual(action.Encoder.layout, '$UA1');
 });
 
 console.log(`\n${passed} checks passed`);

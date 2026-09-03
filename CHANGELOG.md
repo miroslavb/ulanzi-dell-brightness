@@ -5,6 +5,13 @@ All notable changes to the **Dell Monitor Brightness** Ulanzi Deck plugin.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.1.1] - 2026-09-03
+
+### Fixed
+- The **Brightness Encoder** now appears in Ulanzi Studio's encoder tab on
+  D200X. Its manifest follows the working Studio discovery shape and no longer
+  applies a model filter to the encoder surface.
+
 ## [1.1.0] - 2026-09-03
 
 ### Added
