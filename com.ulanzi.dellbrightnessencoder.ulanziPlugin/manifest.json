@@ -1,0 +1,30 @@
+{
+  "Author": "Miroslav Babitski",
+  "Name": "Dell Monitor Brightness Encoder",
+  "Description": "D200X encoder control for the Dell Monitor Brightness DDC/CI backend.",
+  "Icon": "assets/icons/pluginIcon.svg",
+  "Version": "1.2.0",
+  "Category": "Dell Brightness Encoder",
+  "CategoryIcon": "assets/icons/pluginIcon.svg",
+  "CodePath": "plugin/app.html",
+  "Type": "JavaScript",
+  "UUID": "com.ulanzi.ulanzistudio.dellbrightnessencoder",
+  "Actions": [
+    {
+      "Name": "Brightness Encoder",
+      "Icon": "assets/icons/brighter.svg",
+      "PropertyInspectorPath": "property-inspector/inspector.html",
+      "States": [
+        { "Name": "Brightness", "Image": "assets/icons/brighter.svg" }
+      ],
+      "Tooltip": "Turn to adjust monitor brightness",
+      "UUID": "com.ulanzi.ulanzistudio.dellbrightnessencoder.adjust",
+      "Controllers": ["Encoder"],
+      "Encoder": { "layout": "$UA1" },
+      "DisableAutomaticStates": true
+    }
+  ],
+  "OS": [
+    { "Platform": "windows", "MinimumVersion": "10" }
+  ]
+}

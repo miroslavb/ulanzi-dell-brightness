@@ -1,9 +1,9 @@
 {
   "Author": "Miroslav Babitski",
   "Name": "Dell Monitor Brightness",
-  "Description": "Adjust any DDC/CI monitor from Ulanzi keys or a D200X encoder, with selectable MDI icons.",
+  "Description": "Adjust any DDC/CI monitor from Ulanzi keys. The companion Dell Monitor Brightness Encoder plugin adds D200X dial control.",
   "Icon": "assets/icons/pluginIcon.png",
-  "Version": "1.1.4",
+  "Version": "1.2.0",
   "Category": "Monitor Brightness",
   "CategoryIcon": "assets/icons/categoryIcon.png",
   "CodePath": "plugin/app.js",
@@ -41,19 +41,6 @@
       "DisableAutomaticStates": true,
       "Controllers": ["Keypad"],
       "Devices": []
-    },
-    {
-      "Name": "Brightness Encoder",
-      "Icon": "assets/icons/brighter.png",
-      "PropertyInspectorPath": "property-inspector/inspector.html",
-      "States": [
-        { "Name": "Brightness", "Image": "assets/icons/brighter.png" }
-      ],
-      "Tooltip": "Turn to adjust monitor brightness",
-      "UUID": "com.ulanzi.ulanzistudio.dellbrightness.encoder",
-      "Controllers": ["Encoder"],
-      "Encoder": { "layout": "$UA1" },
-      "DisableAutomaticStates": true
     }
   ],
   "OS": [

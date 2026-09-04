@@ -11,8 +11,9 @@ Add two keys to your deck:
 | **Brighter** | sun with **long** rays ☀ | increase brightness by *step* |
 | **Darker**  | sun with **short** rays 🔅 | decrease brightness by *step* |
 
-On D200X you can instead place **Brightness Encoder** on a knob: rotate left/right
-to dim/brighten and read the current percentage on the knob's feedback tile.
+On D200X you can instead place **Brightness Encoder** from the separately listed
+**Dell Brightness Encoder** group on a knob: rotate left/right to dim/brighten and
+read the current percentage on the knob's feedback tile.
 
 The brightness **step (1 / 3 / 5 / 10 %)** is chosen in each key's settings (Property
 Inspector), along with which monitor to control and an optional compact MDI icon.
@@ -47,13 +48,15 @@ No third-party tools (ControlMyMonitor, nircmd, …) and no Node install are req
 ## Install
 
 1. **Fully quit** Ulanzi Studio (system tray → *Exit*, not just close the window).
-2. Copy the whole `com.ulanzi.dellbrightness.ulanziPlugin` folder into the Ulanzi
-   plugins directory:
+2. Copy both `com.ulanzi.dellbrightness.ulanziPlugin` and
+   `com.ulanzi.dellbrightnessencoder.ulanziPlugin` from the release archive into
+   the Ulanzi plugins directory:
    - **Windows:** `%APPDATA%\Ulanzi\UlanziDeck\Plugins\`
      (paste `%APPDATA%\Ulanzi\UlanziDeck\Plugins\` into Explorer's address bar)
 3. **Start Ulanzi Studio.** *Dell Monitor Brightness* now appears in the plugin list.
-4. Drag **Brighter** and **Darker** onto two keys.
-5. Click a key → in the settings panel choose the **Brightness step** and **Monitor**.
+4. Drag **Brighter** and **Darker** onto keys, or open the knob tab and drag
+   **Brightness Encoder** from **Dell Brightness Encoder** onto a D200X knob.
+5. Select an action and choose the **Brightness step**, **Monitor**, and icon.
 
 > Tip: put *Brighter* and *Darker* next to each other for a natural ＋ / − pair.
 
@@ -63,8 +66,10 @@ No third-party tools (ControlMyMonitor, nircmd, …) and no Node install are req
 - **Monitor** — `Auto (first responsive monitor)` or a specific monitor from the list.
   Click **Refresh monitors** after plugging/unplugging a display. The list shows the
   current % of each DDC/CI-capable monitor; non-capable panels are marked `— no DDC/CI`.
-- **Icon** — keep the Studio/manifest icon, or opt into a bundled MDI glyph. The
-  encoder always renders feedback and uses `brightness-7` when no glyph is selected.
+- **Icon** — keep the Studio/manifest icon on keypad actions, or opt into a
+  bundled MDI glyph. The encoder uses a selected MDI glyph in its feedback.
+- **Wide-screen feedback** — disable to keep the D200X LCD area transparent while
+  the encoder continues to control brightness.
 
 > The plugin intentionally does not draw a value on the key. Painting on the key
 > would overwrite a custom icon you set in Ulanzi Studio (the SDK gives no way to
@@ -82,6 +87,8 @@ Deck key ──run──▶ app.js (main service, Node)
                      │  • coalesces rapid presses into one adjust call                     ▼
                      │                                              dxva2.dll Get/SetMonitorBrightness
                      ◀──── { ok, current, min, max } ──────────────  (VCP 0x10, same as DDM)
+
+D200X knob ──▶ HTML encoder main service ──WebSocket 127.0.0.1:9236──▶ DdcController
 ```
 
 - A single long-lived PowerShell process is started once (so the P/Invoke layer is
@@ -95,6 +102,8 @@ Deck key ──run──▶ app.js (main service, Node)
 | Symptom | Fix |
 |---------|-----|
 | Key shows an error / nothing happens | Enable **DDC/CI** in the monitor's OSD menu. Some KVMs, docks and DisplayPort-MST chains block DDC/CI — try a direct cable. |
+| Encoder group is missing | Confirm that the second `com.ulanzi.dellbrightnessencoder.ulanziPlugin` folder is installed, then fully exit and restart Studio. |
+| Encoder shows BACKEND | Confirm that both folders are installed. The keypad/Node plugin owns the local DDC bridge. |
 | Wrong monitor changes | Open the key settings, set **Monitor** to the specific Dell entry instead of *Auto*, then **Refresh monitors**. |
 | Works but feels slow on the very first press | The first call compiles the native layer; subsequent presses are instant. |
 | Brightness jumps in big chunks | Lower the **Brightness step**. |
@@ -121,7 +130,9 @@ powershell -ExecutionPolicy Bypass -File brightness.ps1 -Op adjust -Index 0 -Del
 - Launch Ulanzi Studio with `--nodeRemoteDebug` and open `chrome://inspect` to debug the
   Node main service; use `--log` for verbose logs.
 - Tests (run on any OS, no monitor needed): from the repo root run
-  `node test/test-controller.mjs` and (if `pwsh` is installed) `node test/test-real-pwsh.mjs`.
+  `node test/test-controller.mjs`, `node test/test-bridge.mjs`,
+  `node test/test-sidecar.mjs`, and (if `pwsh` is installed)
+  `node test/test-real-pwsh.mjs`.
 
 ## File layout
 
@@ -131,7 +142,7 @@ com.ulanzi.dellbrightness.ulanziPlugin/
 ├── en.json ru_RU.json de_DE.json zh_CN.json   # localization
 ├── assets/icons/              # brighter/darker (long/short-ray suns) + store icons
 ├── libs/                      # vendored common-html SDK (Property Inspector)
-├── property-inspector/        # settings UI (step / monitor / show-value)
+├── property-inspector/        # keypad settings UI (step / monitor / icon)
 ├── node_modules/ws/           # bundled WebSocket dependency
 └── plugin/
     ├── app.js                 # main service entry
@@ -139,6 +150,7 @@ com.ulanzi.dellbrightness.ulanziPlugin/
     ├── actions/BrightnessAction.js
     └── ddc/
         ├── DdcController.js    # worker mgmt, queue, coalescing
+        ├── DdcBridgeServer.js  # loopback-only API for HTML encoder companion
         └── brightness.ps1     # DDC/CI engine (dxva2 P/Invoke)
 ```
 

@@ -5,6 +5,7 @@
 
 import { UlanziApi } from './common-node/index.js';
 import DdcController from './ddc/DdcController.js';
+import DdcBridgeServer from './ddc/DdcBridgeServer.js';
 import BrightnessAction from './actions/BrightnessAction.js';
 
 const PLUGIN_UUID = 'com.ulanzi.ulanzistudio.dellbrightness';
@@ -14,13 +15,18 @@ const ACTIONS = {};                       // context -> BrightnessAction
 const controller = new DdcController({
   log: (m) => $UD.logMessage(`[ddc] ${m}`, 'debug'),
 });
+const bridge = new DdcBridgeServer(controller, {
+  log: (m) => $UD.logMessage(`[ddc-bridge] ${m}`, 'debug'),
+});
 
 $UD.connect(PLUGIN_UUID);
 $UD.onConnected(() => $UD.logMessage('Dell Monitor Brightness plugin connected', 'info'));
+bridge.start()
+  .then(address => $UD.logMessage(`Dell encoder bridge listening on 127.0.0.1:${address.port}`, 'info'))
+  .catch(error => $UD.logMessage(`Dell encoder bridge failed: ${error.message}`, 'error'));
 
-// Derive direction from the action UUID embedded in the context (uuid___key___actionid).
+// Derive direction from the keypad action UUID embedded in the context.
 function directionFor(jsn) {
-  if (jsn && jsn.context && jsn.context.includes('.encoder')) return 0;
   return jsn && jsn.context && jsn.context.includes('.darker') ? -1 : 1;
 }
 
@@ -47,14 +53,6 @@ $UD.onAdd((jsn) => {
 
 $UD.onRun((jsn) => {
   ensureAction(jsn).run();
-});
-
-$UD.onDialRotateLeft((jsn) => {
-  ensureAction(jsn).onDialRotateLeft();
-});
-
-$UD.onDialRotateRight((jsn) => {
-  ensureAction(jsn).onDialRotateRight();
 });
 
 $UD.onSetActive((jsn) => {
@@ -99,7 +97,8 @@ function normalizeMonitors(res) {
 
 // --- clean shutdown ----------------------------------------------------------
 
-function shutdown() {
+async function shutdown() {
+  try { await bridge.close(); } catch {}
   try { controller.dispose(); } catch {}
   process.exit(0);
 }

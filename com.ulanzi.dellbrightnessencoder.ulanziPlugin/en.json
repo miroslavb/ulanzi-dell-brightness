@@ -1,0 +1,7 @@
+{
+  "Name": "Dell Monitor Brightness Encoder",
+  "Description": "Control DDC/CI monitor brightness with a D200X encoder.",
+  "Actions": [
+    { "Name": "Brightness Encoder", "Tooltip": "Turn to adjust monitor brightness" }
+  ]
+}
