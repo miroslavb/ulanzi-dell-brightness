@@ -5,6 +5,13 @@ All notable changes to the **Dell Monitor Brightness** Ulanzi Deck plugin.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.1.3] - 2026-09-04
+
+### Fixed
+- Declares Ulanzi Studio `3.0.11` as the minimum capability level. Studio kept
+  the plugin in its legacy 2.x action schema while `MinVersion` was `2.1.4`, so
+  the otherwise-valid Node encoder action was omitted from the D200X tab.
+
 ## [1.1.2] - 2026-09-03
 
 ### Fixed

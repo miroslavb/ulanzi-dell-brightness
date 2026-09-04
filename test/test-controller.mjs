@@ -252,6 +252,8 @@ await test('manifest exposes encoder with the minimal known-working Studio shape
       `encoder manifest must omit optional field ${optional}`);
   }
   assert.strictEqual(action.Encoder.layout, '$UA1');
+  assert.strictEqual(manifest.Software?.MinVersion, '3.0.11',
+    'D200X encoder discovery requires the Studio 3.x manifest capability level');
 });
 
 console.log(`\n${passed} checks passed`);

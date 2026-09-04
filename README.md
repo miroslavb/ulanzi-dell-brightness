@@ -23,7 +23,7 @@ Grab the ready-built zip from the [**Releases**](../../releases) page, then:
 3. Start Ulanzi Studio. Drag **Brighter** / **Darker** onto keys and/or
    **Brightness Encoder** onto a D200X knob, then set the step and monitor.
 
-Requires Windows 10+, Ulanzi Studio 2.1.4+ (3.0.11+ for D200X encoders), and
+Requires Windows 10+, Ulanzi Studio 3.0.11+, and
 DDC/CI enabled in the monitor's OSD.
 
 ## Build from source

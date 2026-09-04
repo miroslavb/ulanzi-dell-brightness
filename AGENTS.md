@@ -8,6 +8,8 @@
   omit `Devices` entirely. Despite the public SDK treating omission and `[]`
   as equivalent, the tested D200X Studio hid the action when either a model
   filter or an explicit empty `Devices` field was present.
+- The plugin must declare Studio `3.0.11+`; an explicit 2.x `MinVersion` keeps
+  Node plugins in the legacy action schema and hides D200X encoder actions.
 - Keep the icon catalogue curated and local; do not add the multi-megabyte full
   MDI bundle to this Node plugin.
 - All DDC operations remain serialized and rapid adjustments remain coalesced.
