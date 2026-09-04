@@ -153,6 +153,7 @@ com.ulanzi.dellbrightness.ulanziPlugin/
     ├── common-node/           # vendored common-node SDK
     ├── actions/BrightnessAction.js
     └── ddc/
+        ├── BridgeAuth.js        # token publication into the installed companion
         ├── DdcController.js    # worker mgmt, queue, coalescing
         ├── DdcBridgeServer.js  # loopback-only API for HTML encoder companion
         └── brightness.ps1     # DDC/CI engine (dxva2 P/Invoke)
