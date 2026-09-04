@@ -8,7 +8,7 @@
 // Keypad actions keep the old non-painting behaviour unless the user explicitly
 // selects an MDI icon. D200X feedback is owned by the separate HTML companion.
 
-import { BRIGHTNESS_ICONS, DEFAULT_BRIGHTNESS_ICON, brightnessIconDataUri } from '../icons.js';
+import { BRIGHTNESS_ICONS, brightnessIconDataUri } from '../icons.js';
 
 const VALID_STEPS = [1, 3, 5, 10];
 const DEFAULT_STEP = 5;
@@ -83,8 +83,7 @@ export default class BrightnessAction {
   }
 
   paintIcon(current) {
-    const icon = this.icon || DEFAULT_BRIGHTNESS_ICON;
-    const data = brightnessIconDataUri(icon, current, { showValue: false });
+    const data = brightnessIconDataUri(this.icon, current, { showValue: false });
     this.$UD.setBaseDataIcon(this.context, data, '');
   }
 

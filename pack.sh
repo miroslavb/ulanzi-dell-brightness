@@ -7,7 +7,7 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 BACKEND="com.ulanzi.dellbrightness.ulanziPlugin"
 ENCODER="com.ulanzi.dellbrightnessencoder.ulanziPlugin"
-OUT="$ROOT/dist"
+OUT="${ULANZI_DIST_DIR:-$ROOT/dist}"
 
 cd "$ROOT/$BACKEND"
 
@@ -33,4 +33,4 @@ zip -r -q "$ZIP" "$BACKEND" "$ENCODER" \
   -x "*/.DS_Store" "*/node_modules/.package-lock.json" "*/npm-debug.log"
 
 echo "built: $ZIP"
-unzip -l "$ZIP" | tail -n +4 | head -n 20
+unzip -l "$ZIP" | sed -n '4,23p'

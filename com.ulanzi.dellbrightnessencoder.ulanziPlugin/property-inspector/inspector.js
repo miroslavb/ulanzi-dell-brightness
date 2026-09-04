@@ -74,9 +74,14 @@
       option.disabled = !capable;
       monitorSelect.appendChild(option);
     });
-    if (Array.from(monitorSelect.options).some(option => option.value === selected)) {
-      monitorSelect.value = selected;
+    if (!Array.from(monitorSelect.options).some(option => option.value === selected) && selected !== 'auto') {
+      const missing = document.createElement('option');
+      missing.value = selected;
+      missing.textContent = `Monitor ${selected} (not detected)`;
+      missing.disabled = true;
+      monitorSelect.appendChild(missing);
     }
+    monitorSelect.value = selected;
   }
 
   function requestMonitors() {
@@ -85,10 +90,15 @@
     $UD.sendToPlugin({ op: 'listMonitors' });
   }
 
+  function requestBrightness() {
+    $UD.sendToPlugin({ op: 'getBrightness', monitor: monitorSelect.value || 'auto' });
+  }
+
   $UD.connect();
   $UD.onConnected(() => {
     form.addEventListener('input', saveDebounced);
     form.addEventListener('change', saveDebounced);
+    monitorSelect.addEventListener('change', requestBrightness);
     document.getElementById('refresh').addEventListener('click', requestMonitors);
     $UD.getSettings();
     requestMonitors();
@@ -100,6 +110,7 @@
     const data = message.payload || message.param || message;
     if (data.type === 'monitors') {
       renderMonitors(Array.isArray(data.monitors) ? data.monitors : []);
+      requestBrightness();
       status.className = data.ok ? 'status' : 'status error';
       status.textContent = data.ok
         ? `${data.monitors.length} monitor(s) detected`

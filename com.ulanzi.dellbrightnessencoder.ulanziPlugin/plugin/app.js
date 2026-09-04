@@ -2,16 +2,16 @@
   'use strict';
 
   const PLUGIN_UUID = 'com.ulanzi.ulanzistudio.dellbrightnessencoder';
-  const BRIDGE_URL = 'ws://127.0.0.1:9236';
   const BLANK_FEEDBACK = 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAAC0lEQVR4nGNgAAIAAAUAAXpeqz8AAAAASUVORK5CYII=';
   const VALID_STEPS = [1, 3, 5, 10];
   const ACTIONS = new Map();
 
   class BridgeClient {
-    constructor(url) {
-      this.url = url;
+    constructor(configLoader) {
+      this.configLoader = configLoader;
       this.socket = null;
       this.connectPromise = null;
+      this.generation = 0;
       this.nextId = 1;
       this.pending = new Map();
     }
@@ -19,31 +19,42 @@
     connect() {
       if (this.socket && this.socket.readyState === WebSocket.OPEN) return Promise.resolve();
       if (this.connectPromise) return this.connectPromise;
-      this.connectPromise = new Promise((resolve, reject) => {
-        const socket = new WebSocket(this.url);
+      const generation = ++this.generation;
+      const attempt = this.configLoader().then(config => new Promise((resolve, reject) => {
+        const separator = config.url.includes('?') ? '&' : '?';
+        const socket = new WebSocket(`${config.url}${separator}token=${encodeURIComponent(config.token)}`);
         this.socket = socket;
         const timer = setTimeout(() => {
           try { socket.close(); } catch (e) {}
           reject(new Error('DDC backend connection timed out'));
         }, 2000);
         socket.onopen = () => {
+          if (generation !== this.generation || this.socket !== socket) {
+            socket.close();
+            return;
+          }
           clearTimeout(timer);
-          this.connectPromise = null;
           resolve();
         };
         socket.onerror = () => {
+          if (generation !== this.generation || this.socket !== socket) return;
           clearTimeout(timer);
-          this.connectPromise = null;
           reject(new Error('DDC backend is unavailable'));
         };
         socket.onclose = () => {
           clearTimeout(timer);
-          if (this.socket === socket) this.socket = null;
-          this.connectPromise = null;
-          this.rejectPending(new Error('DDC backend disconnected'));
+          this.rejectPending(new Error('DDC backend disconnected'), socket);
+          if (generation !== this.generation || this.socket !== socket) return;
+          this.socket = null;
         };
         socket.onmessage = event => this.onMessage(event.data);
+      }));
+      const trackedAttempt = attempt.finally(() => {
+        if (generation === this.generation && this.connectPromise === trackedAttempt) {
+          this.connectPromise = null;
+        }
       });
+      this.connectPromise = trackedAttempt;
       return this.connectPromise;
     }
 
@@ -51,12 +62,19 @@
       await this.connect();
       const id = this.nextId++;
       return new Promise((resolve, reject) => {
+        const socket = this.socket;
         const timer = setTimeout(() => {
           this.pending.delete(id);
           reject(new Error('DDC backend request timed out'));
         }, 5000);
-        this.pending.set(id, { resolve, reject, timer });
-        this.socket.send(JSON.stringify({ id, op, ...(data || {}) }));
+        this.pending.set(id, { resolve, reject, timer, socket });
+        try {
+          socket.send(JSON.stringify({ ...(data || {}), id, op }));
+        } catch (error) {
+          clearTimeout(timer);
+          this.pending.delete(id);
+          reject(error);
+        }
       });
     }
 
@@ -70,13 +88,48 @@
       pending.resolve(message.result || { ok: false, error: 'empty_response' });
     }
 
-    rejectPending(error) {
-      for (const pending of this.pending.values()) {
+    rejectPending(error, socket) {
+      for (const [id, pending] of this.pending.entries()) {
+        if (socket && pending.socket !== socket) continue;
         clearTimeout(pending.timer);
         pending.reject(error);
+        this.pending.delete(id);
       }
-      this.pending.clear();
     }
+  }
+
+  function validBridgeConfig(config) {
+    if (!config || !/^[a-f0-9]{64}$/.test(String(config.token || ''))) return false;
+    try {
+      const url = new URL(config.url);
+      return url.protocol === 'ws:' && url.hostname === '127.0.0.1' && /^\d+$/.test(url.port);
+    } catch (error) {
+      return false;
+    }
+  }
+
+  function reloadBridgeConfig() {
+    return new Promise(resolve => {
+      const script = document.createElement('script');
+      script.src = `bridge-auth.js?ts=${Date.now()}`;
+      script.onload = script.onerror = () => {
+        script.remove();
+        resolve();
+      };
+      document.head.appendChild(script);
+    });
+  }
+
+  async function loadBridgeConfig() {
+    await reloadBridgeConfig();
+    for (let attempt = 0; attempt < 12; attempt++) {
+      if (validBridgeConfig(window.DELL_BRIGHTNESS_BRIDGE)) {
+        return window.DELL_BRIGHTNESS_BRIDGE;
+      }
+      await new Promise(resolve => setTimeout(resolve, 250));
+      await reloadBridgeConfig();
+    }
+    throw new Error('DDC backend token is unavailable');
   }
 
   function parseSettings(value) {
@@ -135,7 +188,7 @@
       this.context = context;
       this.bridge = bridge;
       this.settings = parseSettings();
-      this.sequence = 0;
+      this.renderSequence = 0;
     }
 
     configure(settings) {
@@ -148,38 +201,41 @@
     }
 
     async refresh() {
-      const sequence = ++this.sequence;
+      const sequence = ++this.renderSequence;
       try {
         const result = await this.bridge.request('get', { monitor: this.settings.monitor });
-        if (sequence !== this.sequence) return result;
+        if (sequence !== this.renderSequence) return result;
         this.paint(result && result.ok ? result.current : null, !result || !result.ok);
         return result;
       } catch (error) {
-        if (sequence === this.sequence) this.paint(null, true);
+        if (sequence === this.renderSequence) this.paint(null, true);
         return { ok: false, error: error.message };
       }
     }
 
     async adjust(direction) {
+      const sequence = ++this.renderSequence;
       try {
         const result = await this.bridge.request('adjust', {
           monitor: this.settings.monitor,
           delta: direction * this.settings.step
         });
+        if (sequence !== this.renderSequence) return result;
         this.paint(result && result.ok ? result.current : null, !result || !result.ok);
         if (!result || !result.ok) $UD.showAlert(this.context);
         return result;
       } catch (error) {
+        if (sequence !== this.renderSequence) return { ok: false, error: error.message };
         this.paint(null, true);
         $UD.showAlert(this.context);
         return { ok: false, error: error.message };
       }
     }
 
-    destroy() { this.sequence++; }
+    destroy() { this.renderSequence++; }
   }
 
-  const bridge = new BridgeClient(BRIDGE_URL);
+  const bridge = new BridgeClient(loadBridgeConfig);
   const $UD = new UlanziApi();
   $UD.connect(PLUGIN_UUID);
   $UD.onConnected(() => $UD.logMessage('Dell brightness encoder connected', 'info'));
@@ -250,6 +306,8 @@
     BrightnessEncoderAction,
     parseSettings,
     renderFeedback,
-    BLANK_FEEDBACK
+    BLANK_FEEDBACK,
+    validBridgeConfig,
+    loadBridgeConfig
   };
 })();

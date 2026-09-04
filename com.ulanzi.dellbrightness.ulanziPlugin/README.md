@@ -88,7 +88,7 @@ Deck key ──run──▶ app.js (main service, Node)
                      │                                              dxva2.dll Get/SetMonitorBrightness
                      ◀──── { ok, current, min, max } ──────────────  (VCP 0x10, same as DDM)
 
-D200X knob ──▶ HTML encoder main service ──WebSocket 127.0.0.1:9236──▶ DdcController
+D200X knob ──▶ HTML encoder main service ──authenticated WS 127.0.0.1:9236──▶ DdcController
 ```
 
 - A single long-lived PowerShell process is started once (so the P/Invoke layer is
@@ -96,6 +96,9 @@ D200X knob ──▶ HTML encoder main service ──WebSocket 127.0.0.1:9236─
   one-shot `powershell` invocations.
 - Mashing a key fires one combined adjustment (e.g. five quick `+5` presses → one `+25`),
   which is both snappier and gentler on the monitor's DDC/CI channel.
+- The bridge is loopback-only. Each backend start rotates a random handshake
+  token stored in the installed companion folder; remote browser origins are
+  rejected and frames larger than 4 KiB are refused before allocation.
 
 ## Troubleshooting
 
@@ -131,7 +134,8 @@ powershell -ExecutionPolicy Bypass -File brightness.ps1 -Op adjust -Index 0 -Del
   Node main service; use `--log` for verbose logs.
 - Tests (run on any OS, no monitor needed): from the repo root run
   `node test/test-controller.mjs`, `node test/test-bridge.mjs`,
-  `node test/test-sidecar.mjs`, and (if `pwsh` is installed)
+  `node test/test-sidecar.mjs`, `node test/test-inspector.mjs`,
+  `bash test/test-package.sh`, and (if `pwsh` is installed)
   `node test/test-real-pwsh.mjs`.
 
 ## File layout

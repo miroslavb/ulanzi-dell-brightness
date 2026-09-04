@@ -9,7 +9,9 @@
     .hint { margin: 10px 12px; color: #9ca3af; font-size: 11px; line-height: 1.45; }
     .status { margin: 8px 12px; min-height: 16px; color: #93c5fd; font-size: 11px; }
     .status.error { color: #fca5a5; }
-    button { margin-left: 12px; padding: 6px 10px; color: #eee; background: #303030; border: 1px solid #555; border-radius: 4px; }
+    button { padding: 6px 10px; color: #eee; background: #303030; border: 1px solid #555; border-radius: 4px; }
+    button:hover { background: #3b3b3b; border-color: #777; }
+    button:focus-visible { outline: 2px solid #60a5fa; outline-offset: 2px; }
   </style>
   <script src="../libs/js/constants.js"></script>
   <script src="../libs/js/eventEmitter.js"></script>
@@ -35,7 +37,10 @@
         <option value="auto">Auto (first responsive monitor)</option>
       </select>
     </div>
-    <button type="button" id="refresh">Refresh monitors</button>
+    <div class="uspi-item">
+      <div class="uspi-item-label"></div>
+      <div class="uspi-item-value"><button type="button" id="refresh">Refresh monitors</button></div>
+    </div>
     <div class="status" id="status"></div>
     <div class="uspi-item">
       <div class="uspi-item-label">Icon</div>

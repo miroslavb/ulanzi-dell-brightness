@@ -42,6 +42,8 @@ DDC/CI enabled in the monitor's OSD.
 node test/test-controller.mjs    # protocol, coalescing, clamping, manifests
 node test/test-bridge.mjs        # real loopback WebSocket bridge
 node test/test-sidecar.mjs       # HTML sidecar and package contract
+node test/test-inspector.mjs     # Property Inspector settings round-trip
+bash test/test-package.sh        # two-plugin release archive contents
 node test/test-real-pwsh.mjs     # drives the real brightness.ps1 (needs pwsh)
 ```
 

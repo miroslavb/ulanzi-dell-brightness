@@ -14,7 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
   the knob action tree; HTML encoder actions in the same host were listed.
 - Keeps the working Brighter/Darker keys in the original Node plugin and joins
   the HTML encoder to its DDC controller through a loopback-only WebSocket
-  bridge with a fixed operation allowlist and bounded adjustment input.
+  bridge with a per-process handshake token, remote-origin rejection, a 4 KiB
+  frame limit, a fixed operation allowlist, and bounded adjustment input.
 
 ### Added
 - Encoder settings for monitor, step, MDI icon, and optional D200X wide-screen

@@ -7,8 +7,11 @@ the D200X encoder discoverable in Ulanzi Studio and forwards only brightness
 operations to the backend.
 
 The plugins communicate through a WebSocket bound exclusively to
-`127.0.0.1:9236`. The bridge accepts only monitor list/read and bounded
-brightness-adjust requests. It is not exposed to the network.
+`127.0.0.1:9236`. On every backend start, the Node plugin generates a random
+token and writes it to this companion's local `plugin/bridge-auth.js`; the
+WebSocket handshake requires that token and rejects remote web origins. The
+bridge accepts only monitor list/read and bounded brightness-adjust requests.
+It is not exposed to the network.
 
 If the encoder shows an error, confirm that both plugin folders are installed,
 restart Ulanzi Studio completely, and verify that DDC/CI is enabled in the

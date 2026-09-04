@@ -10,8 +10,9 @@
   plugin owns DDC/CI and keypad actions; the HTML companion owns the dedicated
   `Controllers: ["Encoder"]` action and must omit `Devices` entirely.
 - The companion bridge must bind only to `127.0.0.1`, expose only list/get/
-  bounded-adjust operations, reject non-local browser origins, and never accept
-  commands, scripts, or paths.
+  bounded-adjust operations, require the per-process token written into the
+  installed sidecar, reject non-local browser origins, enforce payload limits
+  at the WebSocket layer, and never accept commands, scripts, or paths.
 - D200X encoder feedback must show current DDC/CI brightness after a successful
   adjustment and must support a true transparent-PNG disabled state without
   disabling the dial.
@@ -23,6 +24,7 @@
 - Keep the icon catalogue curated and local; do not add the multi-megabyte full
   MDI bundle to this Node plugin.
 - All DDC operations remain serialized and rapid adjustments remain coalesced.
-- Run `node test/test-controller.mjs`, `node test/test-bridge.mjs`, and
-  `node test/test-sidecar.mjs` after action, renderer, controller, or packaging
-  changes.
+- Run `node test/test-controller.mjs`, `node test/test-bridge.mjs`,
+  `node test/test-sidecar.mjs`, `node test/test-inspector.mjs`, and
+  `bash test/test-package.sh` after action, renderer, controller, PI, or
+  packaging changes.

@@ -4,25 +4,30 @@
 // and delegates only the narrow DDC operations below to this Node backend.
 
 import { WebSocketServer } from 'ws';
+import { timingSafeEqual } from 'node:crypto';
 
 export const DDC_BRIDGE_PORT = 9236;
+export const DDC_BRIDGE_MAX_PAYLOAD = 4096;
 
 export default class DdcBridgeServer {
-  constructor(controller, { host = '127.0.0.1', port = DDC_BRIDGE_PORT, log } = {}) {
+  constructor(controller, { host = '127.0.0.1', port = DDC_BRIDGE_PORT, token, log } = {}) {
     this.controller = controller;
     this.host = host;
     this.port = port;
+    this.token = String(token || '');
     this.log = log || (() => {});
     this.server = null;
   }
 
   start() {
     if (this.server) return Promise.resolve(this.address());
+    if (!this.token) return Promise.reject(new Error('bridge authentication token is required'));
     return new Promise((resolve, reject) => {
       const server = new WebSocketServer({
         host: this.host,
         port: this.port,
-        verifyClient: info => this._originAllowed(info.origin)
+        maxPayload: DDC_BRIDGE_MAX_PAYLOAD,
+        verifyClient: info => this._clientAllowed(info)
       });
       this.server = server;
       const startupError = (error) => {
@@ -45,8 +50,9 @@ export default class DdcBridgeServer {
   }
 
   _onConnection(socket) {
+    socket.on('error', error => this.log(`bridge client error: ${error.message}`));
     socket.on('message', data => {
-      if (data.length > 4096) {
+      if (data.length > DDC_BRIDGE_MAX_PAYLOAD) {
         socket.close(1009, 'message too large');
         return;
       }
@@ -101,6 +107,21 @@ export default class DdcBridgeServer {
     } catch {
       return false;
     }
+  }
+
+  _clientAllowed(info) {
+    if (!this._originAllowed(info?.origin)) return false;
+    let supplied = '';
+    try {
+      const requestUrl = new URL(info?.req?.url || '/', `ws://${this.host}:${this.port}`);
+      supplied = requestUrl.searchParams.get('token') || '';
+    } catch {
+      return false;
+    }
+    const expectedBuffer = Buffer.from(this.token);
+    const suppliedBuffer = Buffer.from(supplied);
+    return suppliedBuffer.length === expectedBuffer.length
+      && timingSafeEqual(suppliedBuffer, expectedBuffer);
   }
 
   _reply(socket, id, result) {

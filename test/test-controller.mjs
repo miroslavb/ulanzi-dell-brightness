@@ -179,6 +179,15 @@ await test('failed adjust shows an alert on the key', async () => {
   assert.strictEqual(ud.alerts, 1);
 });
 
+await test('thrown adjust errors are converted to an alert', async () => {
+  const ud = fakeUD();
+  const a = new BrightnessAction('c___k___a.brighter', ud, {
+    requestAdjust() { throw new Error('transport failed'); }
+  }, 1);
+  await a.run();
+  assert.strictEqual(ud.alerts, 1);
+});
+
 await test('a successful press paints no icon — custom icon is preserved', async () => {
   const ud = fakeUD();
   const a = new BrightnessAction('c___k___a.brighter', ud, fakeController({ ok: true, current: 42 }), 1);
@@ -212,6 +221,35 @@ await test('an explicitly selected MDI icon is rendered on a keypad action', asy
   assert.match(ud.icons[0].data, /^data:image\/svg\+xml;base64,/);
 });
 
+await test('failed icon refresh renders the selected glyph without a value', async () => {
+  const ud = fakeUD();
+  const a = new BrightnessAction('c___k___a.brighter', ud, {
+    get() { return Promise.reject(new Error('offline')); }
+  }, 1);
+  a.updateSettings({ icon: 'monitor' });
+  await sleep(0);
+  assert.strictEqual(ud.icons.length, 1);
+});
+
+await test('inactive and destroyed actions suppress stale refresh painting', async () => {
+  const ud = fakeUD();
+  const resolvers = [];
+  const a = new BrightnessAction('c___k___a.brighter', ud, {
+    get() { return new Promise(resolve => resolvers.push(resolve)); }
+  }, 1);
+  a.updateSettings({ icon: 'monitor' });
+  a.setActive(false);
+  resolvers.shift()({ ok: true, current: 40 });
+  await sleep(0);
+  assert.strictEqual(ud.icons.length, 0);
+
+  a.setActive(true);
+  a.destroy();
+  resolvers.shift()({ ok: true, current: 50 });
+  await sleep(0);
+  assert.strictEqual(ud.icons.length, 0);
+});
+
 // ---- direction detection (mirrors app.js) ----------------------------------
 
 console.log('direction detection:');
@@ -225,12 +263,15 @@ await test('manifests split Node DDC backend from HTML encoder surface', async (
   const manifest = JSON.parse(fs.readFileSync(new URL(
     '../com.ulanzi.dellbrightness.ulanziPlugin/manifest.json', import.meta.url
   ), 'utf8'));
+  assert.equal(manifest.Version, '1.2.0');
   assert.ok(manifest.Actions.every(action => action.Controllers?.length === 1 && action.Controllers[0] === 'Keypad'));
+  assert.ok(!Object.hasOwn(manifest, 'Software'));
 
   const encoderManifest = JSON.parse(fs.readFileSync(new URL(
     '../com.ulanzi.dellbrightnessencoder.ulanziPlugin/manifest.json', import.meta.url
   ), 'utf8'));
   assert.equal(encoderManifest.CodePath, 'plugin/app.html');
+  assert.equal(encoderManifest.Version, manifest.Version);
   assert.equal(encoderManifest.UUID, 'com.ulanzi.ulanzistudio.dellbrightnessencoder');
   const action = encoderManifest.Actions[0];
   assert.deepStrictEqual(action.Controllers, ['Encoder']);
