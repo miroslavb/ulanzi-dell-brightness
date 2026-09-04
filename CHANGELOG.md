@@ -5,6 +5,14 @@ All notable changes to the **Dell Monitor Brightness** Ulanzi Deck plugin.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.1.4] - 2026-09-04
+
+### Fixed
+- Removes the top-level `Software.MinVersion` gate that made Studio list the
+  installed plugin in Settings but hide its entire action catalogue.
+- The encoder entry now matches the official working Node encoder shape,
+  including `DisableAutomaticStates: true`.
+
 ## [1.1.3] - 2026-09-04
 
 ### Fixed

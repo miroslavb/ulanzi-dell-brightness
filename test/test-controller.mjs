@@ -247,13 +247,14 @@ await test('manifest exposes encoder with the minimal known-working Studio shape
   assert.deepStrictEqual(action.Controllers, ['Encoder']);
   assert.ok(!Object.hasOwn(action, 'Devices'),
     'D200X Studio requires Devices to be omitted, not an empty array');
-  for (const optional of ['state', 'SupportedInMultiActions', 'DisableAutomaticStates']) {
+  for (const optional of ['state', 'SupportedInMultiActions']) {
     assert.ok(!Object.hasOwn(action, optional),
       `encoder manifest must omit optional field ${optional}`);
   }
+  assert.strictEqual(action.DisableAutomaticStates, true);
   assert.strictEqual(action.Encoder.layout, '$UA1');
-  assert.strictEqual(manifest.Software?.MinVersion, '3.0.11',
-    'D200X encoder discovery requires the Studio 3.x manifest capability level');
+  assert.ok(!Object.hasOwn(manifest, 'Software'),
+    'a top-level Software gate can hide the complete plugin action catalogue');
 });
 
 console.log(`\n${passed} checks passed`);

@@ -35,7 +35,8 @@ Dell Display Manager. На Windows он вызывает системный `dxv
 ## Requirements
 
 - **Windows 10 or newer** (the brightness backend uses the built-in `dxva2.dll`).
-- **Ulanzi Studio 3.0.11+** with an Ulanzi Deck (D200 / **D200H** / D200X / Dial).
+- A current **Ulanzi Studio 3.x** release (3.0.11+ recommended) with an Ulanzi Deck
+  (D200 / **D200H** / D200X / Dial).
 - The monitor must have **DDC/CI enabled** in its OSD menu
   (Dell U2720Q: *Menu → Others → DDC/CI → On* — it is On by default).
 - Connect the monitor over the cable you normally use with DDM (DP / HDMI / USB-C).
