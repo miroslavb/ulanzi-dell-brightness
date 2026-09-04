@@ -1,15 +1,14 @@
 // BrightnessAction — one instance per key placed on the deck.
 //
-// direction: +1 for the "Brighter" action, -1 for "Darker", 0 for an encoder.
+// direction: +1 for the "Brighter" action, -1 for "Darker".
 // Settings (from the Property Inspector):
 //   step    : "1" | "3" | "5" | "10"   (percentage points per press, default 5)
 //   monitor : "auto" | "<index>"        (DDC/CI monitor target, default auto)
 //
 // Keypad actions keep the old non-painting behaviour unless the user explicitly
-// selects an MDI icon. The encoder always renders feedback because D200X's dial
-// area needs an icon/value supplied by the action.
+// selects an MDI icon. D200X feedback is owned by the separate HTML companion.
 
-import { BRIGHTNESS_ICONS, DEFAULT_BRIGHTNESS_ICON, brightnessIconDataUri } from '../icons.js';
+import { BRIGHTNESS_ICONS, brightnessIconDataUri } from '../icons.js';
 
 const VALID_STEPS = [1, 3, 5, 10];
 const DEFAULT_STEP = 5;
@@ -19,8 +18,7 @@ export default class BrightnessAction {
     this.context = context;
     this.$UD = $UD;
     this.controller = controller;
-    this.direction = direction === 0 ? 0 : (direction > 0 ? 1 : -1);
-    this.isEncoder = this.direction === 0;
+    this.direction = direction > 0 ? 1 : -1;
 
     this.step = DEFAULT_STEP;
     this.monitor = 'auto';
@@ -38,22 +36,18 @@ export default class BrightnessAction {
 
     const icon = String(settings.icon || '').replace(/^mdi:/, '');
     this.icon = BRIGHTNESS_ICONS[icon] ? icon : '';
-    if (this.isEncoder || this.icon) void this.refreshIcon();
+    if (this.icon) void this.refreshIcon();
   }
 
   // With the default empty icon we only track visibility and let Studio restore
-  // its own configured image. An explicitly selected MDI icon, and every dial
-  // feedback tile, are intentionally repainted when their page becomes active.
+  // its own configured image. An explicitly selected MDI icon is intentionally
+  // repainted when its page becomes active.
   setActive(active) {
     this.active = !!active;
-    if (this.active && (this.isEncoder || this.icon)) void this.refreshIcon();
+    if (this.active && this.icon) void this.refreshIcon();
   }
 
   async run() {
-    if (this.isEncoder) {
-      await this.refreshIcon();
-      return;
-    }
     await this.adjust(this.direction);
   }
 
@@ -71,12 +65,12 @@ export default class BrightnessAction {
       this.$UD.showAlert(this.context);
       return res;
     }
-    if (this.isEncoder || this.icon) this.paintIcon(res.current);
+    if (this.icon) this.paintIcon(res.current);
     return res;
   }
 
   async refreshIcon() {
-    if (!this.isEncoder && !this.icon) return;
+    if (!this.icon) return;
     const sequence = ++this.renderSequence;
     let res;
     try {
@@ -89,13 +83,9 @@ export default class BrightnessAction {
   }
 
   paintIcon(current) {
-    const icon = this.icon || DEFAULT_BRIGHTNESS_ICON;
-    const data = brightnessIconDataUri(icon, current, { showValue: this.isEncoder });
+    const data = brightnessIconDataUri(this.icon, current, { showValue: false });
     this.$UD.setBaseDataIcon(this.context, data, '');
   }
-
-  onDialRotateLeft() { return this.adjust(-1); }
-  onDialRotateRight() { return this.adjust(1); }
 
   destroy() { this.renderSequence++; }
 }

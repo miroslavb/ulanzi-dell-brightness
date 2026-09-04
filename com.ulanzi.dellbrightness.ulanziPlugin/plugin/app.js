@@ -4,23 +4,46 @@
 // (the DDC/CI bridge) and a registry of per-key BrightnessAction instances.
 
 import { UlanziApi } from './common-node/index.js';
+import { randomBytes } from 'node:crypto';
 import DdcController from './ddc/DdcController.js';
+import DdcBridgeServer, { DDC_BRIDGE_PORT } from './ddc/DdcBridgeServer.js';
+import { publishBridgeConfig } from './ddc/BridgeAuth.js';
 import BrightnessAction from './actions/BrightnessAction.js';
 
 const PLUGIN_UUID = 'com.ulanzi.ulanzistudio.dellbrightness';
 
 const $UD = new UlanziApi();
 const ACTIONS = {};                       // context -> BrightnessAction
+const bridgeToken = randomBytes(32).toString('hex');
 const controller = new DdcController({
   log: (m) => $UD.logMessage(`[ddc] ${m}`, 'debug'),
+});
+const bridge = new DdcBridgeServer(controller, {
+  token: bridgeToken,
+  log: (m) => $UD.logMessage(`[ddc-bridge] ${m}`, 'debug'),
 });
 
 $UD.connect(PLUGIN_UUID);
 $UD.onConnected(() => $UD.logMessage('Dell Monitor Brightness plugin connected', 'info'));
+let bridgeConfigPublished = false;
+try {
+  publishBridgeConfig({
+    mainServiceUrl: import.meta.url,
+    port: DDC_BRIDGE_PORT,
+    token: bridgeToken
+  });
+  bridgeConfigPublished = true;
+} catch (error) {
+  $UD.logMessage(`Dell encoder bridge token could not be published: ${error.message}`, 'error');
+}
+if (bridgeConfigPublished) {
+  bridge.start()
+    .then(address => $UD.logMessage(`Dell encoder bridge listening on 127.0.0.1:${address.port}`, 'info'))
+    .catch(error => $UD.logMessage(`Dell encoder bridge failed: ${error.message}`, 'error'));
+}
 
-// Derive direction from the action UUID embedded in the context (uuid___key___actionid).
+// Derive direction from the keypad action UUID embedded in the context.
 function directionFor(jsn) {
-  if (jsn && jsn.context && jsn.context.includes('.encoder')) return 0;
   return jsn && jsn.context && jsn.context.includes('.darker') ? -1 : 1;
 }
 
@@ -47,14 +70,6 @@ $UD.onAdd((jsn) => {
 
 $UD.onRun((jsn) => {
   ensureAction(jsn).run();
-});
-
-$UD.onDialRotateLeft((jsn) => {
-  ensureAction(jsn).onDialRotateLeft();
-});
-
-$UD.onDialRotateRight((jsn) => {
-  ensureAction(jsn).onDialRotateRight();
 });
 
 $UD.onSetActive((jsn) => {
@@ -99,7 +114,8 @@ function normalizeMonitors(res) {
 
 // --- clean shutdown ----------------------------------------------------------
 
-function shutdown() {
+async function shutdown() {
+  try { await bridge.close(); } catch {}
   try { controller.dispose(); } catch {}
   process.exit(0);
 }

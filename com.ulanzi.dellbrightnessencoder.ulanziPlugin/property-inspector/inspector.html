@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Dell Brightness Encoder</title>
+  <link rel="stylesheet" href="../libs/css/uspi.css">
+  <style>
+    body { color: #ddd; }
+    .hint { margin: 10px 12px; color: #9ca3af; font-size: 11px; line-height: 1.45; }
+    .status { margin: 8px 12px; min-height: 16px; color: #93c5fd; font-size: 11px; }
+    .status.error { color: #fca5a5; }
+    button { padding: 6px 10px; color: #eee; background: #303030; border: 1px solid #555; border-radius: 4px; }
+    button:hover { background: #3b3b3b; border-color: #777; }
+    button:focus-visible { outline: 2px solid #60a5fa; outline-offset: 2px; }
+  </style>
+  <script src="../libs/js/constants.js"></script>
+  <script src="../libs/js/eventEmitter.js"></script>
+  <script src="../libs/js/timers.js"></script>
+  <script src="../libs/js/utils.js"></script>
+  <script src="../libs/js/ulanziApi.js"></script>
+</head>
+<body>
+<div class="uspi-wrapper">
+  <form id="settings" onsubmit="return false;">
+    <div class="uspi-item">
+      <div class="uspi-item-label">Brightness step</div>
+      <select class="uspi-item-value" name="step">
+        <option value="1">1%</option>
+        <option value="3">3%</option>
+        <option value="5" selected>5%</option>
+        <option value="10">10%</option>
+      </select>
+    </div>
+    <div class="uspi-item">
+      <div class="uspi-item-label">Monitor</div>
+      <select class="uspi-item-value" name="monitor">
+        <option value="auto">Auto (first responsive monitor)</option>
+      </select>
+    </div>
+    <div class="uspi-item">
+      <div class="uspi-item-label"></div>
+      <div class="uspi-item-value"><button type="button" id="refresh">Refresh monitors</button></div>
+    </div>
+    <div class="status" id="status"></div>
+    <div class="uspi-item">
+      <div class="uspi-item-label">Icon</div>
+      <select class="uspi-item-value" name="icon">
+        <option value="brightness-7">Brightness 7</option>
+        <option value="brightness-6">Brightness 6</option>
+        <option value="brightness-5">Brightness 5</option>
+        <option value="monitor">Monitor</option>
+        <option value="gauge">Gauge</option>
+      </select>
+    </div>
+    <div class="uspi-item">
+      <div class="uspi-item-label">Wide-screen feedback</div>
+      <div class="uspi-item-value">
+        <div class="uspi-item-child">
+          <input id="showFeedback" name="showFeedback" type="checkbox" checked>
+          <label for="showFeedback" class="uspi-item-label"><span></span></label>
+        </div>
+      </div>
+    </div>
+    <div class="hint">
+      Turn the encoder to change brightness. Press it to refresh the displayed
+      value. Both Dell plugin folders from the release archive must be installed.
+    </div>
+  </form>
+</div>
+<script src="inspector.js"></script>
+</body>
+</html>

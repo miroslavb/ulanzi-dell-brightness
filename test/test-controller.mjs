@@ -179,6 +179,15 @@ await test('failed adjust shows an alert on the key', async () => {
   assert.strictEqual(ud.alerts, 1);
 });
 
+await test('thrown adjust errors are converted to an alert', async () => {
+  const ud = fakeUD();
+  const a = new BrightnessAction('c___k___a.brighter', ud, {
+    requestAdjust() { throw new Error('transport failed'); }
+  }, 1);
+  await a.run();
+  assert.strictEqual(ud.alerts, 1);
+});
+
 await test('a successful press paints no icon — custom icon is preserved', async () => {
   const ud = fakeUD();
   const a = new BrightnessAction('c___k___a.brighter', ud, fakeController({ ok: true, current: 42 }), 1);
@@ -212,49 +221,62 @@ await test('an explicitly selected MDI icon is rendered on a keypad action', asy
   assert.match(ud.icons[0].data, /^data:image\/svg\+xml;base64,/);
 });
 
-await test('encoder rotation adjusts in both directions and paints live percentage', async () => {
+await test('failed icon refresh renders the selected glyph without a value', async () => {
   const ud = fakeUD();
-  const ctl = fakeController({ ok: true, current: 55 });
-  const a = new BrightnessAction('c___dial___a.encoder', ud, ctl, 0);
-  a.updateSettings({ step: '5', monitor: '0', icon: 'brightness-7' });
+  const a = new BrightnessAction('c___k___a.brighter', ud, {
+    get() { return Promise.reject(new Error('offline')); }
+  }, 1);
+  a.updateSettings({ icon: 'monitor' });
   await sleep(0);
-  await a.onDialRotateLeft();
-  await a.onDialRotateRight();
-  assert.deepStrictEqual(ctl.calls, [
-    { monitor: '0', delta: -5 },
-    { monitor: '0', delta: 5 }
-  ]);
-  const svg = Buffer.from(ud.icons.at(-1).data.split(',')[1], 'base64').toString();
-  assert.match(svg, /55%/);
+  assert.strictEqual(ud.icons.length, 1);
+});
+
+await test('inactive and destroyed actions suppress stale refresh painting', async () => {
+  const ud = fakeUD();
+  const resolvers = [];
+  const a = new BrightnessAction('c___k___a.brighter', ud, {
+    get() { return new Promise(resolve => resolvers.push(resolve)); }
+  }, 1);
+  a.updateSettings({ icon: 'monitor' });
+  a.setActive(false);
+  resolvers.shift()({ ok: true, current: 40 });
+  await sleep(0);
+  assert.strictEqual(ud.icons.length, 0);
+
+  a.setActive(true);
+  a.destroy();
+  resolvers.shift()({ ok: true, current: 50 });
+  await sleep(0);
+  assert.strictEqual(ud.icons.length, 0);
 });
 
 // ---- direction detection (mirrors app.js) ----------------------------------
 
 console.log('direction detection:');
 await test('context string decides brighter (+1) vs darker (-1)', async () => {
-  const directionFor = (jsn) => jsn && jsn.context && jsn.context.includes('.encoder')
-    ? 0 : (jsn && jsn.context && jsn.context.includes('.darker') ? -1 : 1);
+  const directionFor = (jsn) => jsn && jsn.context && jsn.context.includes('.darker') ? -1 : 1;
   assert.strictEqual(directionFor({ context: 'com.ulanzi.ulanzistudio.dellbrightness.brighter___1___x' }), 1);
   assert.strictEqual(directionFor({ context: 'com.ulanzi.ulanzistudio.dellbrightness.darker___2___y' }), -1);
-  assert.strictEqual(directionFor({ context: 'com.ulanzi.ulanzistudio.dellbrightness.encoder___3___z' }), 0);
 });
 
-await test('manifest exposes encoder with the minimal known-working Studio shape', async () => {
+await test('manifests split Node DDC backend from HTML encoder surface', async () => {
   const manifest = JSON.parse(fs.readFileSync(new URL(
     '../com.ulanzi.dellbrightness.ulanziPlugin/manifest.json', import.meta.url
   ), 'utf8'));
-  const action = manifest.Actions.find(item => item.UUID.endsWith('.encoder'));
+  assert.equal(manifest.Version, '1.2.0');
+  assert.ok(manifest.Actions.every(action => action.Controllers?.length === 1 && action.Controllers[0] === 'Keypad'));
+  assert.ok(!Object.hasOwn(manifest, 'Software'));
+
+  const encoderManifest = JSON.parse(fs.readFileSync(new URL(
+    '../com.ulanzi.dellbrightnessencoder.ulanziPlugin/manifest.json', import.meta.url
+  ), 'utf8'));
+  assert.equal(encoderManifest.CodePath, 'plugin/app.html');
+  assert.equal(encoderManifest.Version, manifest.Version);
+  assert.equal(encoderManifest.UUID, 'com.ulanzi.ulanzistudio.dellbrightnessencoder');
+  const action = encoderManifest.Actions[0];
   assert.deepStrictEqual(action.Controllers, ['Encoder']);
-  assert.ok(!Object.hasOwn(action, 'Devices'),
-    'D200X Studio requires Devices to be omitted, not an empty array');
-  for (const optional of ['state', 'SupportedInMultiActions']) {
-    assert.ok(!Object.hasOwn(action, optional),
-      `encoder manifest must omit optional field ${optional}`);
-  }
-  assert.strictEqual(action.DisableAutomaticStates, true);
   assert.strictEqual(action.Encoder.layout, '$UA1');
-  assert.ok(!Object.hasOwn(manifest, 'Software'),
-    'a top-level Software gate can hide the complete plugin action catalogue');
+  assert.ok(!Object.hasOwn(action, 'Devices'));
 });
 
 console.log(`\n${passed} checks passed`);
