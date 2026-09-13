@@ -18,6 +18,12 @@ Brightness is changed over **DDC/CI** (VCP `0x10`) via the built-in Windows `dxv
 > while the discoverable HTML encoder lives in
 > [`com.ulanzi.dellbrightnessencoder.ulanziPlugin/`](com.ulanzi.dellbrightnessencoder.ulanziPlugin/).
 
+## Verified Windows deployment — 2026-09-13
+
+Version **1.2.1** is installed and software-verified on Windows Studio 3.3.6.
+See [the verification record](docs/VERIFICATION_2026-09-13.md) for archive identity,
+restart/readback evidence and the remaining physical-device checks.
+
 ## Install (Windows)
 
 Grab the ready-built zip from the [**Releases**](../../releases) page, then:
