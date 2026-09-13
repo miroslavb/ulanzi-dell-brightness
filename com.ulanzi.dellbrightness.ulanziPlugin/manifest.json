@@ -3,7 +3,7 @@
   "Name": "Dell Monitor Brightness",
   "Description": "Adjust any DDC/CI monitor from Ulanzi keys. The companion Dell Monitor Brightness Encoder plugin adds D200X dial control.",
   "Icon": "assets/icons/pluginIcon.png",
-  "Version": "1.2.0",
+  "Version": "1.2.1",
   "Category": "Monitor Brightness",
   "CategoryIcon": "assets/icons/categoryIcon.png",
   "CodePath": "plugin/app.js",
@@ -38,6 +38,21 @@
       "Tooltip": "Decrease monitor brightness",
       "UUID": "com.ulanzi.ulanzistudio.dellbrightness.darker",
       "SupportedInMultiActions": true,
+      "DisableAutomaticStates": true,
+      "Controllers": ["Keypad"],
+      "Devices": []
+    },
+    {
+      "Name": "Brightness Display",
+      "Icon": "assets/icons/brighter.png",
+      "PropertyInspectorPath": "property-inspector/inspector.html",
+      "state": 0,
+      "States": [
+        { "Name": "Current Brightness", "Image": "assets/icons/brighter.png" }
+      ],
+      "Tooltip": "Display the monitor's current brightness",
+      "UUID": "com.ulanzi.ulanzistudio.dellbrightness.display",
+      "SupportedInMultiActions": false,
       "DisableAutomaticStates": true,
       "Controllers": ["Keypad"],
       "Devices": []

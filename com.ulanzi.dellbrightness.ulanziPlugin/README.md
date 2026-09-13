@@ -4,12 +4,16 @@ Control the brightness of a **Dell U2720Q** (or any DDC/CI monitor) straight fro
 **Ulanzi Deck D200H/D200X** — a lightweight replacement for the brightness slider in
 *Dell Display Manager (DDM)*.
 
-Add two keys to your deck:
+Add three keys to your deck:
 
 | Key | Default icon | Action |
 |-----|--------------|--------|
 | **Brighter** | sun with **long** rays ☀ | increase brightness by *step* |
 | **Darker**  | sun with **short** rays 🔅 | decrease brightness by *step* |
+| **Brightness Display** | live sun + percentage | poll and show current brightness without changing it |
+
+The display tile polls every two seconds while visible. Pressing it refreshes
+its reading and never changes monitor brightness.
 
 On D200X you can instead place **Brightness Encoder** from the separately listed
 **Dell Brightness Encoder** group on a knob: rotate left/right to dim/brighten and
@@ -54,8 +58,9 @@ No third-party tools (ControlMyMonitor, nircmd, …) and no Node install are req
    - **Windows:** `%APPDATA%\Ulanzi\UlanziDeck\Plugins\`
      (paste `%APPDATA%\Ulanzi\UlanziDeck\Plugins\` into Explorer's address bar)
 3. **Start Ulanzi Studio.** *Dell Monitor Brightness* now appears in the plugin list.
-4. Drag **Brighter** and **Darker** onto keys, or open the knob tab and drag
-   **Brightness Encoder** from **Dell Brightness Encoder** onto a D200X knob.
+4. Drag **Brighter**, **Darker**, or the live read-only **Brightness Display**
+   onto keys. Open the knob tab and drag **Brightness Encoder** from
+   **Dell Brightness Encoder** onto a D200X knob.
 5. Select an action and choose the **Brightness step**, **Monitor**, and icon.
 
 > Tip: put *Brighter* and *Darker* next to each other for a natural ＋ / − pair.
@@ -71,10 +76,10 @@ No third-party tools (ControlMyMonitor, nircmd, …) and no Node install are req
 - **Wide-screen feedback** — disable to keep the D200X LCD area transparent while
   the encoder continues to control brightness.
 
-> The plugin intentionally does not draw a value on the key. Painting on the key
-> would overwrite a custom icon you set in Ulanzi Studio (the SDK gives no way to
-> read that icon back to restore it), so your chosen icon is always preserved. The
-> brightness change is visible on the monitor itself.
+> The Brighter/Darker controls intentionally do not draw a value when **Keep
+> Studio icon** is selected. Painting those keys would overwrite a custom icon
+> (the SDK gives no way to read it back). The dedicated **Brightness Display**
+> is the opt-in tile that the plugin owns and repaints with the live percentage.
 
 ## How it works
 
@@ -134,7 +139,8 @@ powershell -ExecutionPolicy Bypass -File brightness.ps1 -Op adjust -Index 0 -Del
   Node main service; use `--log` for verbose logs.
 - Tests (run on any OS, no monitor needed): from the repo root run
   `node test/test-controller.mjs`, `node test/test-bridge.mjs`,
-  `node test/test-sidecar.mjs`, `node test/test-inspector.mjs`,
+  `node test/test-sidecar.mjs`, `node test/test-sdk-runtime.mjs`,
+  `node test/test-display.mjs`, `node test/test-inspector.mjs`,
   `bash test/test-package.sh`, and (if `pwsh` is installed)
   `node test/test-real-pwsh.mjs`.
 
@@ -142,7 +148,7 @@ powershell -ExecutionPolicy Bypass -File brightness.ps1 -Op adjust -Index 0 -Del
 
 ```
 com.ulanzi.dellbrightness.ulanziPlugin/
-├── manifest.json              # plugin + 2 actions (Brighter / Darker)
+├── manifest.json              # plugin + 3 keypad actions
 ├── en.json ru_RU.json de_DE.json zh_CN.json   # localization
 ├── assets/icons/              # brighter/darker (long/short-ray suns) + store icons
 ├── libs/                      # vendored common-html SDK (Property Inspector)
@@ -152,6 +158,7 @@ com.ulanzi.dellbrightness.ulanziPlugin/
     ├── app.js                 # main service entry
     ├── common-node/           # vendored common-node SDK
     ├── actions/BrightnessAction.js
+    ├── actions/BrightnessDisplayAction.js
     └── ddc/
         ├── BridgeAuth.js        # token publication into the installed companion
         ├── DdcController.js    # worker mgmt, queue, coalescing

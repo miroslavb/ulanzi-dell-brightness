@@ -9,8 +9,10 @@ import DdcController from './ddc/DdcController.js';
 import DdcBridgeServer, { DDC_BRIDGE_PORT } from './ddc/DdcBridgeServer.js';
 import { publishBridgeConfig } from './ddc/BridgeAuth.js';
 import BrightnessAction from './actions/BrightnessAction.js';
+import BrightnessDisplayAction from './actions/BrightnessDisplayAction.js';
 
 const PLUGIN_UUID = 'com.ulanzi.ulanzistudio.dellbrightness';
+const DISPLAY_ACTION_UUID = `${PLUGIN_UUID}.display`;
 
 const $UD = new UlanziApi();
 const ACTIONS = {};                       // context -> BrightnessAction
@@ -47,10 +49,16 @@ function directionFor(jsn) {
   return jsn && jsn.context && jsn.context.includes('.darker') ? -1 : 1;
 }
 
+function isDisplayAction(jsn) {
+  return !!(jsn?.context && jsn.context.startsWith(`${DISPLAY_ACTION_UUID}___`));
+}
+
 function ensureAction(jsn) {
   let inst = ACTIONS[jsn.context];
   if (!inst) {
-    inst = new BrightnessAction(jsn.context, $UD, controller, directionFor(jsn));
+    inst = isDisplayAction(jsn)
+      ? new BrightnessDisplayAction(jsn.context, $UD, controller)
+      : new BrightnessAction(jsn.context, $UD, controller, directionFor(jsn));
     ACTIONS[jsn.context] = inst;
   }
   return inst;

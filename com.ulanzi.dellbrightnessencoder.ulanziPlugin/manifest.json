@@ -3,7 +3,7 @@
   "Name": "Dell Monitor Brightness Encoder",
   "Description": "D200X encoder control for the Dell Monitor Brightness DDC/CI backend.",
   "Icon": "assets/icons/pluginIcon.svg",
-  "Version": "1.2.0",
+  "Version": "1.2.1",
   "Category": "Dell Brightness Encoder",
   "CategoryIcon": "assets/icons/pluginIcon.svg",
   "CodePath": "plugin/app.html",

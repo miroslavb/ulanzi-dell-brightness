@@ -5,6 +5,23 @@ All notable changes to the **Dell Monitor Brightness** Ulanzi Deck plugin.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.2.1] - 2026-09-13
+
+### Fixed
+- The HTML encoder main service and its Property Inspector now use the `$UD`
+  singleton created by the bundled browser SDK. v1.2.0 attempted to construct a
+  nonexistent `UlanziApi` class and failed before registering any encoder event
+  handlers; the exact `UlanziApi is not defined` error was reproduced with the
+  real SDK script sequence and observed in the installed Studio 3.3.6 host log.
+- Regression coverage now loads the real browser SDK and sends Studio-shaped
+  `add` and `dialrotate` envelopes through the companion to the authenticated
+  bridge, including cold token publication and token-rotation reconnect checks.
+
+### Added
+- A separate read-only **Brightness Display** keypad action. It shows the
+  current DDC/CI brightness, polls every two seconds only while visible, and
+  refreshes without changing brightness when pressed.
+
 ## [1.2.0] - 2026-09-04
 
 ### Fixed

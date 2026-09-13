@@ -236,7 +236,6 @@
   }
 
   const bridge = new BridgeClient(loadBridgeConfig);
-  const $UD = new UlanziApi();
   $UD.connect(PLUGIN_UUID);
   $UD.onConnected(() => $UD.logMessage('Dell brightness encoder connected', 'info'));
 

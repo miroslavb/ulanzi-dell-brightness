@@ -71,10 +71,11 @@ const canvas = {
   },
   toDataURL() { return 'data:image/png;base64,ZmFrZS1wbmc='; }
 };
+const fakeUd = new FakeUlanziApi();
 const sandbox = {
+  $UD: fakeUd,
   window: { DELL_BRIGHTNESS_ICONS: { 'brightness-7': 'M0 0', monitor: 'M0 0', gauge: 'M0 0' } },
   document: { createElement: kind => { assert.equal(kind, 'canvas'); return { ...canvas }; } },
-  UlanziApi: FakeUlanziApi,
   WebSocket: class {},
   setTimeout,
   clearTimeout,
@@ -286,8 +287,9 @@ class ControlledWebSocket {
   open() { this.readyState = ControlledWebSocket.OPEN; this.onopen(); }
 }
 sandbox.WebSocket = ControlledWebSocket;
+let currentRaceToken = 'b'.repeat(64);
 const raceClient = new exported.BridgeClient(async () => ({
-  url: 'ws://127.0.0.1:9236', token: 'b'.repeat(64)
+  url: 'ws://127.0.0.1:9236', token: currentRaceToken
 }));
 const firstConnect = raceClient.connect();
 assert.strictEqual(raceClient.connect(), firstConnect, 'concurrent callers share one connection attempt');
@@ -317,6 +319,22 @@ assert.equal(successorRejected, false, 'a stale close cannot reject successor re
 assert.equal(raceClient.pending.has(999), true);
 clearTimeout(successorTimer);
 raceClient.pending.delete(999);
+
+socketB.close();
+socketB.onclose();
+assert.equal(raceClient.socket, null);
+assert.equal(raceClient.connectPromise, null);
+currentRaceToken = 'c'.repeat(64);
+const thirdConnect = raceClient.connect();
+await new Promise(resolve => setTimeout(resolve, 0));
+const socketC = ControlledWebSocket.instances.at(-1);
+assert.notStrictEqual(socketC, socketB);
+assert.equal(new URL(socketC.url).searchParams.get('token'), currentRaceToken,
+  'a reconnect loads the backend\'s rotated per-process token');
+socketC.open();
+await thirdConnect;
+assert.strictEqual(raceClient.socket, socketC);
+socketC.close();
 
 const rejectedConfigClient = new exported.BridgeClient(async () => {
   throw new Error('config missing');

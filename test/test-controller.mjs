@@ -263,7 +263,7 @@ await test('manifests split Node DDC backend from HTML encoder surface', async (
   const manifest = JSON.parse(fs.readFileSync(new URL(
     '../com.ulanzi.dellbrightness.ulanziPlugin/manifest.json', import.meta.url
   ), 'utf8'));
-  assert.equal(manifest.Version, '1.2.0');
+  assert.equal(manifest.Version, '1.2.1');
   assert.ok(manifest.Actions.every(action => action.Controllers?.length === 1 && action.Controllers[0] === 'Keypad'));
   assert.ok(!Object.hasOwn(manifest, 'Software'));
 
