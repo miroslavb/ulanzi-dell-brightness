@@ -13,7 +13,7 @@ This source commit pins the installed package; subsequent verification-documenta
 - The installed encoder runtime was exercised with software-injected SDK dial events against the real DDC/CI monitor: **65 → 70 → 65**. The original value was restored.
 - After a full Studio restart, a fresh authenticated bridge read returned **65%** and Studio showed the encoder feedback. The temporary loopback debugger was disabled.
 - The controller suite (24 named checks), real PowerShell protocol suite (4 checks), real-SDK startup/dial, bridge/auth/reconnect, inspector, display, unavailable-value and package checks passed.
-- This does not claim a physical knob was manually rotated, or that the new standalone display tile was placed on hardware. Add **Brightness Display** to a free keypad position to use it.
+- At the initial validation checkpoint, the agent had not observed manual knob rotation or placed the new standalone tile. The later operator confirmation and approved tile placement are recorded in the follow-up below.
 
 
 ## Follow-up: standalone MDI brightness tile
