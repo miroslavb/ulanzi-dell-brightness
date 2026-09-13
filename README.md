@@ -22,7 +22,9 @@ Brightness is changed over **DDC/CI** (VCP `0x10`) via the built-in Windows `dxv
 
 Version **1.2.1** is installed and software-verified on Windows Studio 3.3.6.
 See [the verification record](docs/VERIFICATION_2026-09-13.md) for archive identity,
-restart/readback evidence and the remaining physical-device checks.
+restart/readback evidence and the physical-device scope. The operator has since
+confirmed operation; the active profile uses a standalone MDI brightness tile
+and disables only the monitor encoder feedback on the wide display.
 
 ## Install (Windows)
 

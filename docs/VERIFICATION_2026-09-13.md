@@ -15,6 +15,11 @@ This source commit pins the installed package; subsequent verification-documenta
 - The controller suite (24 named checks), real PowerShell protocol suite (4 checks), real-SDK startup/dial, bridge/auth/reconnect, inspector, display, unavailable-value and package checks passed.
 - This does not claim a physical knob was manually rotated, or that the new standalone display tile was placed on hardware. Add **Brightness Display** to a free keypad position to use it.
 
+
+## Follow-up: standalone MDI brightness tile
+
+The operator confirmed the repaired plugins work and requested monitor brightness on a separate keypad tile rather than the wide display. With explicit approval, the old Brighter key was replaced by Brightness Display, `icon=monitor`, `monitor=auto`; encoder `showFeedback=false` preserves rotation without monitor feedback on the wide display. The inherited custom-image state was reset only for this replacement. A fresh foreground-pixel capture showed the monitor glyph and **65%** on the separate tile, with no monitor percentage on the wide display. The saved profile and HA globals were read back; installed plugin files were unchanged. Evidence: private `brightness-tile-verification.json` and `studio-brightness-final.png` in the existing evidence directory.
+
 ## Evidence and limits
 
 Private local receipts, the source/installed-file comparison, monitor before/after/restore result and native Studio screenshot review are retained under `/root/.hermes/work/ulanzi-repair-20260913/`. Raw Windows logs and settings are not published: they can contain credentials. Code is on the repair feature branch; no new GitHub binary release was published as part of this task.
