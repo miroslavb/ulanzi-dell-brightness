@@ -176,7 +176,8 @@
     ctx.font = 'bold 32px sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(Number.isFinite(Number(current)) ? `${Math.round(Number(current))}%` : '--', 72, 103);
+    const hasReading = current !== null && current !== undefined && current !== '' && Number.isFinite(Number(current));
+    ctx.fillText(hasReading ? `${Math.round(Number(current))}%` : '--', 72, 103);
     ctx.fillStyle = '#94a3b8';
     ctx.font = 'bold 12px sans-serif';
     ctx.fillText(failed ? 'BACKEND' : 'BRIGHTNESS', 72, 130);

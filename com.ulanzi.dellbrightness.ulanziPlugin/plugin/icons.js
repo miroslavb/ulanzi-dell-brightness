@@ -21,14 +21,14 @@ export const DEFAULT_BRIGHTNESS_ICON = 'brightness-7';
 export function brightnessIconDataUri(name, current, { showValue = false } = {}) {
   const iconName = BRIGHTNESS_ICONS[name] ? name : DEFAULT_BRIGHTNESS_ICON;
   const path = BRIGHTNESS_ICONS[iconName];
-  const hasValue = showValue && Number.isFinite(Number(current));
+  const hasValue = showValue && current !== null && current !== undefined && current !== '' && Number.isFinite(Number(current));
   const value = hasValue ? Math.round(Number(current)) : null;
-  const iconY = hasValue ? 12 : 20;
-  const iconSize = hasValue ? 68 : 82;
+  const iconY = showValue ? 12 : 20;
+  const iconSize = showValue ? 68 : 82;
   const scale = iconSize / 24;
   const iconX = (100 - iconSize) / 2;
-  const valueSvg = hasValue
-    ? `<text x="50" y="92" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="22" font-weight="700" fill="#f8fafc">${value}%</text>`
+  const valueSvg = showValue
+    ? `<text x="50" y="92" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="22" font-weight="700" fill="#f8fafc">${hasValue ? `${value}%` : '--'}</text>`
     : '';
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">` +
     `<rect width="100" height="100" rx="10" fill="#111827"/>` +

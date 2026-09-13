@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/).
 - Regression coverage now loads the real browser SDK and sends Studio-shaped
   `add` and `dialrotate` envelopes through the companion to the authenticated
   bridge, including cold token publication and token-rotation reconnect checks.
+- Failed or missing DDC readings display `--`, never a fabricated `0%`, on
+  both the dedicated brightness tile and encoder feedback.
 
 ### Added
 - A separate read-only **Brightness Display** keypad action. It shows the

@@ -24,6 +24,16 @@
 - Keep the icon catalogue curated and local; do not add the multi-megabyte full
   MDI bundle to this Node plugin.
 - All DDC operations remain serialized and rapid adjustments remain coalesced.
+- Browser main services and Property Inspectors must use the `$UD` singleton
+  supplied by the browser SDK (`UlanziStreamDeck`), not the Node-only
+  `UlanziApi` constructor. Load the real packaged SDK scripts in regression
+  tests; a fabricated constructor stub can hide a fatal startup error.
+- Keep Brightness Display as a separate read-only keypad action. Poll only
+  while visible, cancel its timer on removal, and never change brightness when
+  this tile is pressed. Preserve Brighter/Darker UUIDs and no-paint defaults.
+- Verify the encoder through actual Studio-shaped dial events and the
+  authenticated bridge, including late backend startup and token rotation.
+  Report injected-event checks separately from physical knob confirmation.
 - Run `node test/test-controller.mjs`, `node test/test-bridge.mjs`,
   `node test/test-sidecar.mjs`, `node test/test-inspector.mjs`, and
   `bash test/test-package.sh` after action, renderer, controller, PI, or
