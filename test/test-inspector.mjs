@@ -33,23 +33,20 @@ const form = {
 const status = { className: '', textContent: '' };
 const refresh = control();
 
-class FakeUlanziApi {
-  constructor() {
-    this.handlers = {};
-    this.sent = [];
-    this.saved = [];
-    this.getSettingsCalls = 0;
-    FakeUlanziApi.instance = this;
-  }
-  connect() {}
-  onConnected(fn) { this.handlers.connected = fn; }
-  onAdd(fn) { this.handlers.add = fn; }
-  onDidReceiveSettings(fn) { this.handlers.didReceiveSettings = fn; }
-  onSendToPropertyInspector(fn) { this.handlers.sendToPropertyInspector = fn; }
-  getSettings() { this.getSettingsCalls++; }
-  setSettings(settings) { this.saved.push(settings); }
+const fakeUD = {
+  handlers: {},
+  sent: [],
+  saved: [],
+  getSettingsCalls: 0,
+  connect() {},
+  onConnected(fn) { this.handlers.connected = fn; },
+  onAdd(fn) { this.handlers.add = fn; },
+  onDidReceiveSettings(fn) { this.handlers.didReceiveSettings = fn; },
+  onSendToPropertyInspector(fn) { this.handlers.sendToPropertyInspector = fn; },
+  getSettings() { this.getSettingsCalls++; },
+  setSettings(settings) { this.saved.push(settings); },
   sendToPlugin(payload) { this.sent.push(payload); }
-}
+};
 
 const document = {
   getElementById(id) {
@@ -60,14 +57,14 @@ const document = {
     return { value: '', textContent: '', disabled: false };
   }
 };
-const sandbox = { UlanziApi: FakeUlanziApi, document, setTimeout, clearTimeout, console };
+const sandbox = { $UD: fakeUD, document, setTimeout, clearTimeout, console };
 vm.createContext(sandbox);
 const source = fs.readFileSync(new URL(
   '../com.ulanzi.dellbrightnessencoder.ulanziPlugin/property-inspector/inspector.js', import.meta.url
 ), 'utf8');
 new vm.Script(source, { filename: 'encoder/property-inspector/inspector.js' }).runInContext(sandbox);
 
-const ud = FakeUlanziApi.instance;
+const ud = fakeUD;
 ud.handlers.connected();
 assert.equal(ud.getSettingsCalls, 1);
 assert.deepEqual(JSON.parse(JSON.stringify(ud.sent.at(-1))), { op: 'listMonitors' });

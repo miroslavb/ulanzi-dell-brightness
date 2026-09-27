@@ -5,6 +5,62 @@ All notable changes to the **Dell Monitor Brightness** Ulanzi Deck plugin.
 The format is based on [Keep a Changelog](https://keepachangelog.com/),
 and this project adheres to [Semantic Versioning](https://semver.org/).
 
+## [1.3.0] - 2026-09-27
+
+### Added
+- **Full Material Design Icons library** (@mdi/js 7.4.47, 7,447 icons,
+  Apache-2.0) for Brighter, Darker and Brightness Display. The Property
+  Inspector keeps the curated icons as default quick picks and adds a search
+  box with a scrollable preview grid (up to 40 matches, ranked prefix > word
+  prefix > substring > all words). Press Enter to use an exact name such as
+  `mdi:monitor`. The catalogue is a JSON data file read lazily, once, by the
+  Node main service; the Property Inspector queries it over
+  `sendToPlugin`/`sendToPropertyInspector` and never loads it.
+- **Selectable icon colour** (`iconColor`, default `#facc15`), validated as
+  `#rrggbb` by the backend.
+- **Brightness encoded as colour intensity** on the Brightness Display tile:
+  full colour at 100%, mixed toward the tile background with a 30% floor at
+  0%, linear in between. An unknown reading (`--`) shows a neutral grey glyph
+  instead of looking like 0%.
+
+### Changed
+- Brightness Display layout: a 56px icon at y=8 and a 16px value at baseline
+  y=86 (previously 68px at y=12 with a 22px value at y=92). The glyph and value
+  are now clearly separated.
+- Brighter/Darker with an explicitly selected icon accept any MDI icon and the
+  chosen colour. They stay full colour without intensity encoding because they
+  do not poll and would show stale levels. **Keep Studio icon** (empty icon)
+  still never paints the key.
+- The Property Inspector's Refresh monitors button no longer wraps or shows a
+  stray label colon.
+- The HTML encoder companion is unchanged apart from the version number. It
+  keeps its curated icon set, and no webview loads the full catalogue.
+
+### Fixed
+- Icon-only Brighter/Darker keys drew their glyph 20px down and past the
+  bottom edge (82px at y=20); the glyph is now centred (76px at 12,12).
+- Icon names that match inherited object keys (`constructor`, `__proto__`)
+  were accepted as icons; names are now validated and looked up safely.
+
+## [1.2.1] - 2026-09-13
+
+### Fixed
+- The HTML encoder main service and its Property Inspector now use the `$UD`
+  singleton created by the bundled browser SDK. v1.2.0 attempted to construct a
+  nonexistent `UlanziApi` class and failed before registering any encoder event
+  handlers; the exact `UlanziApi is not defined` error was reproduced with the
+  real SDK script sequence and observed in the installed Studio 3.3.6 host log.
+- Regression coverage now loads the real browser SDK and sends Studio-shaped
+  `add` and `dialrotate` envelopes through the companion to the authenticated
+  bridge, including cold token publication and token-rotation reconnect checks.
+- Failed or missing DDC readings display `--`, never a fabricated `0%`, on
+  both the dedicated brightness tile and encoder feedback.
+
+### Added
+- A separate read-only **Brightness Display** keypad action. It shows the
+  current DDC/CI brightness, polls every two seconds only while visible, and
+  refreshes without changing brightness when pressed.
+
 ## [1.2.0] - 2026-09-04
 
 ### Fixed

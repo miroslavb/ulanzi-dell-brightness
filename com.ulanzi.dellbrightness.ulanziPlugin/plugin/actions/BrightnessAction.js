@@ -2,13 +2,21 @@
 //
 // direction: +1 for the "Brighter" action, -1 for "Darker".
 // Settings (from the Property Inspector):
-//   step    : "1" | "3" | "5" | "10"   (percentage points per press, default 5)
-//   monitor : "auto" | "<index>"        (DDC/CI monitor target, default auto)
+//   step      : "1" | "3" | "5" | "10"  (percentage points per press, default 5)
+//   monitor   : "auto" | "<index>"       (DDC/CI monitor target, default auto)
+//   icon      : "" (default, Keep Studio icon) | any MDI name, "mdi:" optional
+//   iconColor : "#rrggbb"                (default #facc15)
 //
 // Keypad actions keep the old non-painting behaviour unless the user explicitly
-// selects an MDI icon. D200X feedback is owned by the separate HTML companion.
+// selects an MDI icon; an empty or unknown icon never paints. A selected icon
+// is drawn in the full chosen colour without brightness-intensity encoding:
+// these keys do not poll, so an intensity would go stale as soon as the other
+// key, the encoder or the monitor OSD changed brightness. The Brightness
+// Display tile is the live, intensity-encoded gauge. D200X feedback is owned by
+// the separate HTML companion.
 
-import { BRIGHTNESS_ICONS, brightnessIconDataUri } from '../icons.js';
+import { brightnessIconDataUri, normalizeIconColor, resolveIconPath } from '../icons.js';
+import { normalizeIconName } from '../mdiCatalog.js';
 
 const VALID_STEPS = [1, 3, 5, 10];
 const DEFAULT_STEP = 5;
@@ -23,6 +31,7 @@ export default class BrightnessAction {
     this.step = DEFAULT_STEP;
     this.monitor = 'auto';
     this.icon = '';
+    this.iconColor = normalizeIconColor();
     this.active = true;
     this.renderSequence = 0;
   }
@@ -34,8 +43,9 @@ export default class BrightnessAction {
     this.monitor = (settings.monitor === undefined || settings.monitor === null || settings.monitor === '')
       ? 'auto' : String(settings.monitor);
 
-    const icon = String(settings.icon || '').replace(/^mdi:/, '');
-    this.icon = BRIGHTNESS_ICONS[icon] ? icon : '';
+    const icon = normalizeIconName(settings.icon);
+    this.icon = icon && resolveIconPath(icon) ? icon : '';
+    this.iconColor = normalizeIconColor(settings.iconColor);
     if (this.icon) void this.refreshIcon();
   }
 
@@ -83,7 +93,9 @@ export default class BrightnessAction {
   }
 
   paintIcon(current) {
-    const data = brightnessIconDataUri(this.icon, current, { showValue: false });
+    const data = brightnessIconDataUri(this.icon, current, {
+      showValue: false, color: this.iconColor, encodeIntensity: false
+    });
     this.$UD.setBaseDataIcon(this.context, data, '');
   }
 

@@ -1,7 +1,6 @@
 (function () {
   'use strict';
 
-  const $UD = new UlanziApi();
   const form = document.getElementById('settings');
   const monitorSelect = form.elements.monitor;
   const status = document.getElementById('status');

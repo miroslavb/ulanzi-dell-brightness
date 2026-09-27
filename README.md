@@ -2,9 +2,14 @@
 
 An **Ulanzi Deck** plugin that controls the brightness of a **Dell U2720Q** (or any
 DDC/CI monitor) from your deck — a lightweight replacement for the brightness slider in
-*Dell Display Manager*. Use **Brighter** / **Darker** keys or the D200X
-**Brightness Encoder**; the step (1 / 3 / 5 / 10 %) and an optional MDI icon are
-chosen in the action settings. The release contains two cooperating plugin
+*Dell Display Manager*. Use **Brighter** / **Darker** keys, the read-only
+**Brightness Display** keypad tile, or the D200X **Brightness Encoder**. The
+control step (1 / 3 / 5 / 10 %) and monitor are selected per action. The display
+tile polls every two seconds while visible and pressing it only refreshes the
+reading; it never changes monitor brightness. Keypad actions can use any icon from the
+full [Material Design Icons](https://pictogrammers.com/library/mdi/) library (searchable
+in the key settings) in a colour of your choice, and the display tile encodes the current
+brightness as the icon's colour intensity. The release contains two cooperating plugin
 folders because Ulanzi Studio 3.3.6 does not list encoder actions served by a
 Node main service, even though it loads their layouts successfully.
 
@@ -16,6 +21,14 @@ Brightness is changed over **DDC/CI** (VCP `0x10`) via the built-in Windows `dxv
 > while the discoverable HTML encoder lives in
 > [`com.ulanzi.dellbrightnessencoder.ulanziPlugin/`](com.ulanzi.dellbrightnessencoder.ulanziPlugin/).
 
+## Verified Windows deployment — 2026-09-13
+
+Version **1.2.1** is installed and software-verified on Windows Studio 3.3.6.
+See [the verification record](docs/VERIFICATION_2026-09-13.md) for archive identity,
+restart/readback evidence and the physical-device scope. The operator has since
+confirmed operation; the active profile uses a standalone MDI brightness tile
+and disables only the monitor encoder feedback on the wide display.
+
 ## Install (Windows)
 
 Grab the ready-built zip from the [**Releases**](../../releases) page, then:
@@ -24,8 +37,9 @@ Grab the ready-built zip from the [**Releases**](../../releases) page, then:
 2. Unzip both `com.ulanzi.dellbrightness.ulanziPlugin\` and
    `com.ulanzi.dellbrightnessencoder.ulanziPlugin\` into
    `%APPDATA%\Ulanzi\UlanziDeck\Plugins\`.
-3. Start Ulanzi Studio. Drag **Brighter** / **Darker** onto keys and/or
-   **Brightness Encoder** onto a D200X knob, then set the step and monitor.
+3. Start Ulanzi Studio. Drag **Brighter** / **Darker** or the live, read-only
+   **Brightness Display** onto keys. Drag **Brightness Encoder** onto a D200X
+   knob, then select the monitor and (for controls) the step.
 
 Requires Windows 10+ and a current Ulanzi Studio 3.x release; 3.0.11+ is recommended. Also requires
 DDC/CI enabled in the monitor's OSD.
@@ -41,8 +55,13 @@ DDC/CI enabled in the monitor's OSD.
 ```bash
 node test/test-controller.mjs    # protocol, coalescing, clamping, manifests
 node test/test-bridge.mjs        # real loopback WebSocket bridge
-node test/test-sidecar.mjs       # HTML sidecar and package contract
-node test/test-inspector.mjs     # Property Inspector settings round-trip
+node test/test-sidecar.mjs       # HTML sidecar, cold startup, token rotation
+node test/test-sdk-runtime.mjs    # real HTML SDK startup + actual dial envelope
+node test/test-display.mjs        # live keypad display polling + no-adjust press
+node test/test-inspector.mjs      # encoder Property Inspector settings round-trip
+node test/test-keypad-inspector.mjs  # keypad PI <-> backend icon search, colour, settings
+node test/test-icons.mjs          # renderer, intensity, colour, layout, MDI search, webview isolation
+node test/test-unavailable-feedback.mjs  # unavailable reading is never shown as 0%
 bash test/test-package.sh        # two-plugin release archive contents
 node test/test-real-pwsh.mjs     # drives the real brightness.ps1 (needs pwsh)
 ```
@@ -55,5 +74,24 @@ com.ulanzi.dellbrightnessencoder.ulanziPlugin/   HTML D200X encoder action
 test/                                     Node test suites + mock DDC worker
 pack.sh                                   build a distributable zip
 ```
+
+## D200X hardware acceptance checklist
+
+Software tests do not prove physical-device behavior. After installing both
+v1.3.0 folders and fully restarting Studio, verify independently:
+
+- Encoder: action is listed and placeable; its Inspector opens; both rotation
+  directions adjust the selected monitor; press refreshes; feedback updates.
+- Brightness Display: tile is listed and placeable; percentage updates after an
+  external brightness change; pressing it does not change brightness; the icon
+  dims as brightness goes down and the value sits clearly below the icon.
+- Icons: searching (for example `lightbulb`) shows previews; a picked library
+  icon and a custom colour render on the key; `mdi:<name>` + Enter works.
+- Persistence: switch pages, restart Studio, and re-check settings and behavior.
+- Legacy keys: Brighter/Darker still work and custom Studio icons remain intact
+  when **Keep Studio icon** is selected.
+
+Physical D200X validation is pending until this checklist is run on the target
+Windows/Ulanzi Studio 3.3.6 installation.
 
 Built with the [UlanziDeck Plugin SDK](https://github.com/UlanziTechnology/UlanziDeckPlugin-SDK). Apache-2.0.

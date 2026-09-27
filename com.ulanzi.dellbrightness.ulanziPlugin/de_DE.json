@@ -3,7 +3,8 @@
   "Description": "Helligkeit eines Dell U2720Q (oder eines beliebigen DDC/CI-Monitors) direkt vom Ulanzi Deck steuern.",
   "Actions": [
     { "Name": "Heller", "Tooltip": "Monitorhelligkeit erhöhen" },
-    { "Name": "Dunkler", "Tooltip": "Monitorhelligkeit verringern" }
+    { "Name": "Dunkler", "Tooltip": "Monitorhelligkeit verringern" },
+    { "Name": "Helligkeitsanzeige", "Tooltip": "Aktuelle Monitorhelligkeit anzeigen" }
   ],
   "Localization": {
     "Brightness step": "Helligkeitsschritt",
@@ -13,6 +14,19 @@
     "Auto (first responsive monitor)": "Automatisch (erster reagierender Monitor)",
     "Refresh monitors": "Monitore aktualisieren",
     "Current": "Aktuell",
+    "Icon colour": "Symbolfarbe",
+    "Find icon": "Symbol suchen",
+    "IconSearchPlaceholder": "lightbulb, sun, mdi:monitor",
+    "Default icon": "Standardsymbol",
+    "IconDefault": "Standard (mdi:{name})",
+    "IconUnknown": "mdi:{name} (nicht gefunden)",
+    "IconSearching": "Suche…",
+    "IconNotFound": "Kein Symbol namens {name}",
+    "IconQuickPicks": "Schnellauswahl. Weitere Symbole über die Suche.",
+    "IconNoMatches": "Keine Symbole für „{query}“",
+    "IconSomeMatches": "{shown} von {total} Treffern. Suche verfeinern.",
+    "IconAllMatches": "{shown} Treffer",
+    "IconHint": "Die Suche umfasst die gesamte Material-Design-Icons-Bibliothek; Enter übernimmt einen exakten Namen wie mdi:monitor. Die Helligkeitsanzeige dimmt die Symbolfarbe entsprechend der Monitorhelligkeit.",
     "DdcHint": "Die Helligkeit wird über DDC/CI (VCP 0x10) gesteuert – derselbe Kanal, den der Dell Display Manager nutzt. DDC/CI muss im OSD-Menü des Monitors aktiviert sein."
   }
 }

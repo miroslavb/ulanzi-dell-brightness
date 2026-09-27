@@ -3,7 +3,8 @@
   "Description": "通过 Ulanzi Deck 直接调节 Dell U2720Q（或任意支持 DDC/CI 的显示器）的亮度。",
   "Actions": [
     { "Name": "调亮", "Tooltip": "提高显示器亮度" },
-    { "Name": "调暗", "Tooltip": "降低显示器亮度" }
+    { "Name": "调暗", "Tooltip": "降低显示器亮度" },
+    { "Name": "亮度显示", "Tooltip": "显示当前显示器亮度" }
   ],
   "Localization": {
     "Brightness step": "亮度步长",
@@ -13,6 +14,19 @@
     "Auto (first responsive monitor)": "自动（第一个可控显示器）",
     "Refresh monitors": "刷新显示器列表",
     "Current": "当前",
+    "Icon colour": "图标颜色",
+    "Find icon": "搜索图标",
+    "IconSearchPlaceholder": "lightbulb, sun, mdi:monitor",
+    "Default icon": "默认图标",
+    "IconDefault": "默认 (mdi:{name})",
+    "IconUnknown": "mdi:{name}（未找到）",
+    "IconSearching": "搜索中…",
+    "IconNotFound": "没有名为 {name} 的图标",
+    "IconQuickPicks": "快速选择。搜索可获取更多图标。",
+    "IconNoMatches": "没有与“{query}”匹配的图标",
+    "IconSomeMatches": "显示 {total} 个结果中的 {shown} 个，请细化搜索。",
+    "IconAllMatches": "{shown} 个结果",
+    "IconHint": "搜索覆盖完整的 Material Design Icons 图标库；按 Enter 可使用精确名称，例如 mdi:monitor。亮度显示按键的图标颜色深浅随显示器亮度变化。",
     "DdcHint": "亮度通过 DDC/CI（VCP 0x10）控制，与 Dell Display Manager 使用的通道相同。请在显示器 OSD 菜单中启用 DDC/CI。"
   }
 }

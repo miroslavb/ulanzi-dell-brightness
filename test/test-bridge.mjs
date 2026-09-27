@@ -137,8 +137,9 @@ class FakeUlanziApi {
   onClear() {}
 }
 const sandbox = {
+  $UD: new FakeUlanziApi(),
   window: { DELL_BRIGHTNESS_ICONS: { 'brightness-7': 'M0 0' } },
-  document: {}, UlanziApi: FakeUlanziApi, WebSocket, setTimeout, clearTimeout, console
+  document: {}, WebSocket, setTimeout, clearTimeout, console
 };
 vm.createContext(sandbox);
 const appSource = fs.readFileSync(new URL(
