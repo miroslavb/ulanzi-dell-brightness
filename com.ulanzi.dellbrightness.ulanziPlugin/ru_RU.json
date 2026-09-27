@@ -14,6 +14,19 @@
     "Auto (first responsive monitor)": "Авто (первый отвечающий монитор)",
     "Refresh monitors": "Обновить список мониторов",
     "Current": "Текущая",
+    "Icon colour": "Цвет иконки",
+    "Find icon": "Найти иконку",
+    "IconSearchPlaceholder": "lightbulb, sun, mdi:monitor",
+    "Default icon": "Иконка по умолчанию",
+    "IconDefault": "По умолчанию (mdi:{name})",
+    "IconUnknown": "mdi:{name} (не найдена)",
+    "IconSearching": "Поиск…",
+    "IconNotFound": "Иконка {name} не найдена",
+    "IconQuickPicks": "Быстрый выбор. Остальные иконки — через поиск.",
+    "IconNoMatches": "Нет иконок по запросу «{query}»",
+    "IconSomeMatches": "Показано {shown} из {total}. Уточните запрос.",
+    "IconAllMatches": "Найдено: {shown}",
+    "IconHint": "Поиск идёт по всей библиотеке Material Design Icons; Enter применяет точное имя, например mdi:monitor. На плитке «Текущая яркость» насыщенность цвета иконки соответствует яркости монитора.",
     "DdcHint": "Яркость управляется по DDC/CI (VCP 0x10) — тот же канал, что использует Dell Display Manager. В меню монитора (OSD) должен быть включён DDC/CI."
   }
 }

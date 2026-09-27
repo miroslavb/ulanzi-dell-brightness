@@ -14,6 +14,19 @@
     "Auto (first responsive monitor)": "Auto (first responsive monitor)",
     "Refresh monitors": "Refresh monitors",
     "Current": "Current",
+    "Icon colour": "Icon colour",
+    "Find icon": "Find icon",
+    "IconSearchPlaceholder": "lightbulb, sun, mdi:monitor",
+    "Default icon": "Default icon",
+    "IconDefault": "Default (mdi:{name})",
+    "IconUnknown": "mdi:{name} (not found)",
+    "IconSearching": "Searching…",
+    "IconNotFound": "No icon named {name}",
+    "IconQuickPicks": "Quick picks. Search for more icons.",
+    "IconNoMatches": "No icons match \"{query}\"",
+    "IconSomeMatches": "{shown} of {total} matches. Refine the search.",
+    "IconAllMatches": "{shown} matches",
+    "IconHint": "Search covers the full Material Design Icons library; press Enter to use an exact name such as mdi:monitor. The Brightness Display tile dims its icon colour with the monitor brightness.",
     "DdcHint": "Brightness is controlled over DDC/CI (VCP 0x10), the same channel Dell Display Manager uses. The monitor must have DDC/CI enabled in its OSD menu."
   }
 }

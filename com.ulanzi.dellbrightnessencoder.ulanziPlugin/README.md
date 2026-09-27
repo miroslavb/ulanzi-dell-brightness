@@ -17,6 +17,10 @@ WebSocket handshake requires that token and rejects remote web origins. The
 bridge accepts only monitor list/read and bounded brightness-adjust requests.
 It is not exposed to the network.
 
+The encoder keeps its own small curated icon set. The full Material Design
+Icons library used by the keypad actions lives only in the Node plugin and is
+never loaded by this HTML companion.
+
 If the encoder shows an error, confirm that both plugin folders are installed,
 restart Ulanzi Studio completely, and verify that DDC/CI is enabled in the
 monitor OSD.

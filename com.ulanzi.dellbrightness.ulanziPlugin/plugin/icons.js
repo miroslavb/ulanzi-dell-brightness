@@ -1,6 +1,16 @@
-// Curated Material Design Icons for the brightness action picker.
-// Paths come from @mdi/js 7.4.47 (Apache-2.0). Keeping a small local subset
-// avoids loading the multi-megabyte full icon catalogue in Ulanzi Studio.
+// Key-image renderer for the keypad actions.
+//
+// BRIGHTNESS_ICONS is the curated quick-pick set shown first in the Property
+// Inspector; it resolves without touching the full catalogue. Any other MDI
+// name resolves through the lazily loaded Node-only catalogue (mdiCatalog.js).
+// Paths come from @mdi/js 7.4.47 (Apache-2.0).
+//
+// Output is D200H-safe SVG: one rect, one transformed path and optional text.
+// No clip-path, stroke-dasharray, gradients, opacity tricks or viewBox offset.
+// Brightness intensity is encoded by pre-mixing the icon colour toward the tile
+// background, so the device only has to draw a plain solid fill.
+
+import { mdiCatalog, normalizeIconName } from './mdiCatalog.js';
 
 export const BRIGHTNESS_ICONS = {
   'brightness-5': 'M12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6A6,6 0 0,1 18,12A6,6 0 0,1 12,18M20,15.31L23.31,12L20,8.69V4H15.31L12,0.69L8.69,4H4V8.69L0.69,12L4,15.31V20H8.69L12,23.31L15.31,20H20V15.31Z',
@@ -16,23 +26,114 @@ export const BRIGHTNESS_ICONS = {
   gauge: 'M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12C20,14.4 19,16.5 17.3,18C15.9,16.7 14,16 12,16C10,16 8.2,16.7 6.7,18C5,16.5 4,14.4 4,12A8,8 0 0,1 12,4M14,5.89C13.62,5.9 13.26,6.15 13.1,6.54L11.81,9.77L11.71,10C11,10.13 10.41,10.6 10.14,11.26C9.73,12.29 10.23,13.45 11.26,13.86C12.29,14.27 13.45,13.77 13.86,12.74C14.12,12.08 14,11.32 13.57,10.76L13.67,10.5L14.96,7.29L14.97,7.26C15.17,6.75 14.92,6.17 14.41,5.96C14.28,5.91 14.15,5.89 14,5.89M10,6A1,1 0 0,0 9,7A1,1 0 0,0 10,8A1,1 0 0,0 11,7A1,1 0 0,0 10,6M7,9A1,1 0 0,0 6,10A1,1 0 0,0 7,11A1,1 0 0,0 8,10A1,1 0 0,0 7,9M17,9A1,1 0 0,0 16,10A1,1 0 0,0 17,11A1,1 0 0,0 18,10A1,1 0 0,0 17,9Z'
 };
 
+export const QUICK_PICK_ICONS = Object.freeze(Object.keys(BRIGHTNESS_ICONS));
 export const DEFAULT_BRIGHTNESS_ICON = 'brightness-7';
+export const DEFAULT_ICON_COLOR = '#facc15';
+export const TILE_BACKGROUND = '#111827';
+export const VALUE_TEXT_COLOR = '#f8fafc';
+// Unknown/unavailable brightness is neutral grey, never "dimmed like 0%".
+export const UNKNOWN_ICON_COLOR = '#6b7280';
+export const UNKNOWN_TEXT_COLOR = '#9ca3af';
+// At 0% the icon keeps this share of its colour so it stays clearly visible.
+export const INTENSITY_FLOOR = 0.3;
 
-export function brightnessIconDataUri(name, current, { showValue = false } = {}) {
-  const iconName = BRIGHTNESS_ICONS[name] ? name : DEFAULT_BRIGHTNESS_ICON;
-  const path = BRIGHTNESS_ICONS[iconName];
-  const hasValue = showValue && current !== null && current !== undefined && current !== '' && Number.isFinite(Number(current));
-  const value = hasValue ? Math.round(Number(current)) : null;
-  const iconY = showValue ? 12 : 20;
-  const iconSize = showValue ? 68 : 82;
-  const scale = iconSize / 24;
-  const iconX = (100 - iconSize) / 2;
-  const valueSvg = showValue
-    ? `<text x="50" y="92" text-anchor="middle" font-family="Segoe UI,Arial,sans-serif" font-size="22" font-weight="700" fill="#f8fafc">${hasValue ? `${value}%` : '--'}</text>`
-    : '';
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">` +
-    `<rect width="100" height="100" rx="10" fill="#111827"/>` +
-    `<g transform="translate(${iconX},${iconY}) scale(${scale})"><path d="${path}" fill="#facc15"/></g>` +
+// 100x100 tile geometry. Display tile: 56px glyph box at y=8..64 (typical MDI
+// ink ~10..62), then a clear gap before a 16px bold value with baseline y=86
+// (digit ink ~74..86). 1.2.1 used a 68px glyph at y=12 and a 22px value at
+// y=92, which left the value touching the glyph.
+export const DISPLAY_LAYOUT = Object.freeze({
+  iconSize: 56, iconY: 8, valueFontSize: 16, valueBaseline: 86
+});
+// Icon-only keys (Brighter/Darker with an explicit icon): centred glyph.
+export const ICON_ONLY_LAYOUT = Object.freeze({ iconSize: 76, iconY: 12 });
+
+const COLOR_PATTERN = /^#[0-9a-fA-F]{6}$/;
+
+export function isCuratedIcon(name) {
+  return Object.hasOwn(BRIGHTNESS_ICONS, name);
+}
+
+// Curated names never load the catalogue; other names hit the lazy Node-only
+// catalogue. Returns null for unknown or malformed names.
+export function resolveIconPath(name, catalog = mdiCatalog) {
+  const key = normalizeIconName(name);
+  if (!key) return null;
+  if (isCuratedIcon(key)) return BRIGHTNESS_ICONS[key];
+  return catalog.get(key);
+}
+
+// Accepts only "#rrggbb" (any case) and returns it lowercased; everything
+// else falls back to the default colour.
+export function normalizeIconColor(value, fallback = DEFAULT_ICON_COLOR) {
+  const text = typeof value === 'string' ? value.trim() : '';
+  return COLOR_PATTERN.test(text) ? text.toLowerCase() : fallback;
+}
+
+export function hasBrightnessReading(current) {
+  if (typeof current === 'number') return Number.isFinite(current);
+  if (typeof current === 'string') return current.trim() !== '' && Number.isFinite(Number(current));
+  return false;
+}
+
+// intensity = FLOOR + (1 - FLOOR) * clamp(brightness, 0, 100) / 100
+// -> 0% = 0.30, 50% = 0.65, 100% = 1.00; unknown = null.
+export function iconIntensity(current, floor = INTENSITY_FLOOR) {
+  if (!hasBrightnessReading(current)) return null;
+  const percent = Math.min(100, Math.max(0, Number(current)));
+  return floor + (1 - floor) * (percent / 100);
+}
+
+function hexToRgb(hex) {
+  const value = Number.parseInt(hex.slice(1), 16);
+  return [(value >> 16) & 255, (value >> 8) & 255, value & 255];
+}
+
+// Linear per-channel mix: background + (color - background) * amount.
+export function mixHex(color, background, amount) {
+  const t = Math.min(1, Math.max(0, Number(amount)));
+  const fg = hexToRgb(normalizeIconColor(color));
+  const bg = hexToRgb(normalizeIconColor(background, TILE_BACKGROUND));
+  return '#' + fg.map((channel, index) =>
+    Math.round(bg[index] + (channel - bg[index]) * t).toString(16).padStart(2, '0')
+  ).join('');
+}
+
+// The solid fill used for the glyph at a given brightness reading.
+export function intensityColor(color, current) {
+  const intensity = iconIntensity(current);
+  if (intensity === null) return UNKNOWN_ICON_COLOR;
+  return mixHex(normalizeIconColor(color), TILE_BACKGROUND, intensity);
+}
+
+function round(value) {
+  return Number(value.toFixed(4));
+}
+
+export function brightnessIconSvg(name, current, {
+  showValue = false,
+  color = DEFAULT_ICON_COLOR,
+  encodeIntensity = showValue
+} = {}) {
+  const path = resolveIconPath(name) || BRIGHTNESS_ICONS[DEFAULT_BRIGHTNESS_ICON];
+  const layout = showValue ? DISPLAY_LAYOUT : ICON_ONLY_LAYOUT;
+  const scale = round(layout.iconSize / 24);
+  const iconX = round((100 - layout.iconSize) / 2);
+  const baseColor = normalizeIconColor(color);
+  const fill = encodeIntensity ? intensityColor(baseColor, current) : baseColor;
+  let valueSvg = '';
+  if (showValue) {
+    const known = hasBrightnessReading(current);
+    const label = known ? `${Math.round(Number(current))}%` : '--';
+    valueSvg = `<text x="50" y="${layout.valueBaseline}" text-anchor="middle" ` +
+      `font-family="Segoe UI,Arial,sans-serif" font-size="${layout.valueFontSize}" font-weight="700" ` +
+      `fill="${known ? VALUE_TEXT_COLOR : UNKNOWN_TEXT_COLOR}">${label}</text>`;
+  }
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100">` +
+    `<rect width="100" height="100" rx="10" fill="${TILE_BACKGROUND}"/>` +
+    `<g transform="translate(${iconX},${layout.iconY}) scale(${scale})"><path d="${path}" fill="${fill}"/></g>` +
     valueSvg + '</svg>';
-  return 'data:image/svg+xml;base64,' + Buffer.from(svg).toString('base64');
+}
+
+export function brightnessIconDataUri(name, current, options = {}) {
+  return 'data:image/svg+xml;base64,' + Buffer.from(brightnessIconSvg(name, current, options)).toString('base64');
 }

@@ -10,6 +10,8 @@ import DdcBridgeServer, { DDC_BRIDGE_PORT } from './ddc/DdcBridgeServer.js';
 import { publishBridgeConfig } from './ddc/BridgeAuth.js';
 import BrightnessAction from './actions/BrightnessAction.js';
 import BrightnessDisplayAction from './actions/BrightnessDisplayAction.js';
+import { handleInspectorMessage } from './inspectorMessages.js';
+import { mdiCatalog } from './mdiCatalog.js';
 
 const PLUGIN_UUID = 'com.ulanzi.ulanzistudio.dellbrightness';
 const DISPLAY_ACTION_UUID = `${PLUGIN_UUID}.display`;
@@ -20,6 +22,8 @@ const bridgeToken = randomBytes(32).toString('hex');
 const controller = new DdcController({
   log: (m) => $UD.logMessage(`[ddc] ${m}`, 'debug'),
 });
+// The full MDI catalogue is loaded lazily on the first search or non-curated icon.
+mdiCatalog.log = (m) => $UD.logMessage(`[mdi] ${m}`, 'error');
 const bridge = new DdcBridgeServer(controller, {
   token: bridgeToken,
   log: (m) => $UD.logMessage(`[ddc-bridge] ${m}`, 'debug'),
@@ -98,27 +102,18 @@ $UD.onClear((jsn) => {
 });
 
 // --- Property Inspector <-> main service messaging ---------------------------
-// The PI asks for the monitor list to populate its dropdown.
+// The PI asks for the monitor list, the current reading and MDI icon search
+// results (the full catalogue stays in this Node process; see
+// inspectorMessages.js for the message contract).
 
 $UD.onSendToPlugin(async (jsn) => {
-  const payload = jsn && jsn.payload ? jsn.payload : {};
-  const ctx = jsn.context;
-
-  if (payload.op === 'listMonitors') {
-    const res = await controller.list();
-    $UD.sendToPropertyInspector({ type: 'monitors', monitors: normalizeMonitors(res), ok: !!res.ok }, ctx);
-  } else if (payload.op === 'getBrightness') {
-    const res = await controller.get(payload.monitor);
-    $UD.sendToPropertyInspector({ type: 'brightness', result: res }, ctx);
+  try {
+    const reply = await handleInspectorMessage(jsn && jsn.payload, { controller });
+    if (reply) $UD.sendToPropertyInspector(reply, jsn.context);
+  } catch (error) {
+    $UD.logMessage(`Property Inspector request failed: ${error && error.message ? error.message : error}`, 'error');
   }
 });
-
-// PowerShell's ConvertTo-Json collapses a single-element array into one object;
-// make the monitor list a real array on the JS side.
-function normalizeMonitors(res) {
-  if (!res || !res.monitors) return [];
-  return Array.isArray(res.monitors) ? res.monitors : [res.monitors];
-}
 
 // --- clean shutdown ----------------------------------------------------------
 

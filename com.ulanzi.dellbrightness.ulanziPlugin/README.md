@@ -10,30 +10,23 @@ Add three keys to your deck:
 |-----|--------------|--------|
 | **Brighter** | sun with **long** rays ☀ | increase brightness by *step* |
 | **Darker**  | sun with **short** rays 🔅 | decrease brightness by *step* |
-| **Brightness Display** | live sun + percentage | poll and show current brightness without changing it |
+| **Brightness Display** | live icon + percentage | poll and show current brightness without changing it |
 
 The display tile polls every two seconds while visible. Pressing it refreshes
-its reading and never changes monitor brightness.
+its reading and never changes monitor brightness. Its icon colour intensity
+follows the brightness: full colour at 100%, dimmed toward the tile background
+down to a 30% floor at 0%, and neutral grey when the reading is unavailable
+(`--`).
 
 On D200X you can instead place **Brightness Encoder** from the separately listed
 **Dell Brightness Encoder** group on a knob: rotate left/right to dim/brighten and
 read the current percentage on the knob's feedback tile.
 
 The brightness **step (1 / 3 / 5 / 10 %)** is chosen in each key's settings (Property
-Inspector), along with which monitor to control and an optional compact MDI icon.
-With **Keep Studio icon** (the default), keypad actions never draw over the key, so
-any custom icon you set in Ulanzi Studio is kept.
-
----
-
-## Как это работает (RU, кратко)
-
-Плагин меняет яркость по **DDC/CI** (VCP-код `0x10`) — это тот же канал, что использует
-Dell Display Manager. На Windows он вызывает системный `dxva2.dll`
-(`GetMonitorBrightness` / `SetMonitorBrightness`), **без сторонних программ**. Добавьте на
-деку кнопки «Ярче» и «Темнее», в настройках кнопки выберите шаг (1/3/5/10 %) и нужный
-монитор. Установка — скопировать папку плагина в каталог плагинов Ulanzi (см. ниже) и
-перезапустить Ulanzi Studio.
+Inspector), along with which monitor to control, an optional icon from the full
+Material Design Icons library, and the icon colour. With **Keep Studio icon** (the
+default), Brighter/Darker never draw over the key, so any custom icon you set in
+Ulanzi Studio is kept.
 
 ---
 
@@ -71,8 +64,16 @@ No third-party tools (ControlMyMonitor, nircmd, …) and no Node install are req
 - **Monitor** — `Auto (first responsive monitor)` or a specific monitor from the list.
   Click **Refresh monitors** after plugging/unplugging a display. The list shows the
   current % of each DDC/CI-capable monitor; non-capable panels are marked `— no DDC/CI`.
-- **Icon** — keep the Studio/manifest icon on keypad actions, or opt into a
-  bundled MDI glyph. The encoder uses a selected MDI glyph in its feedback.
+- **Icon** — on Brighter/Darker, **Keep Studio icon** (default) never paints the
+  key; picking an icon makes the plugin draw it. On Brightness Display the
+  default is `mdi:brightness-7`. The curated quick picks are shown first.
+- **Icon colour** — any colour (default `#facc15`). Brightness Display dims this
+  colour with the monitor brightness; Brighter/Darker use it at full strength.
+- **Find icon** — searches all ~7,400 Material Design Icons by name (prefix,
+  word and substring matches, up to 40 previews). Click a preview to use it, or
+  type an exact name such as `mdi:lightbulb-on` and press Enter.
+- The D200X encoder (separate companion plugin) keeps its own small curated
+  icon list for its feedback.
 - **Wide-screen feedback** — disable to keep the D200X LCD area transparent while
   the encoder continues to control brightness.
 
@@ -141,8 +142,12 @@ powershell -ExecutionPolicy Bypass -File brightness.ps1 -Op adjust -Index 0 -Del
   `node test/test-controller.mjs`, `node test/test-bridge.mjs`,
   `node test/test-sidecar.mjs`, `node test/test-sdk-runtime.mjs`,
   `node test/test-display.mjs`, `node test/test-inspector.mjs`,
-  `bash test/test-package.sh`, and (if `pwsh` is installed)
-  `node test/test-real-pwsh.mjs`.
+  `node test/test-unavailable-feedback.mjs`, `node test/test-icons.mjs`,
+  `node test/test-keypad-inspector.mjs`, `bash test/test-package.sh`, and (if
+  `pwsh` is installed) `node test/test-real-pwsh.mjs`.
+- The full icon catalogue is loaded only by the Node main service. Keep it out
+  of every webview (Property Inspector and the HTML companion); the Property
+  Inspector asks the main service for search results instead.
 
 ## File layout
 
@@ -152,11 +157,15 @@ com.ulanzi.dellbrightness.ulanziPlugin/
 ├── en.json ru_RU.json de_DE.json zh_CN.json   # localization
 ├── assets/icons/              # brighter/darker (long/short-ray suns) + store icons
 ├── libs/                      # vendored common-html SDK (Property Inspector)
-├── property-inspector/        # keypad settings UI (step / monitor / icon)
+├── property-inspector/        # keypad settings UI (step / monitor / icon / colour)
 ├── node_modules/ws/           # bundled WebSocket dependency
 └── plugin/
     ├── app.js                 # main service entry
     ├── common-node/           # vendored common-node SDK
+    ├── icons.js               # SVG key renderer, colour + intensity, quick picks
+    ├── mdiCatalog.js          # lazy Node-only MDI catalogue + search
+    ├── inspectorMessages.js   # Property Inspector request handling
+    ├── data/mdi-icons.json    # @mdi/js 7.4.47 paths (Apache-2.0), Node only
     ├── actions/BrightnessAction.js
     ├── actions/BrightnessDisplayAction.js
     └── ddc/
@@ -170,3 +179,5 @@ com.ulanzi.dellbrightness.ulanziPlugin/
 
 Apache-2.0 (matches the Ulanzi SDK). Built with the
 [UlanziDeck Plugin SDK](https://github.com/UlanziTechnology/UlanziDeckPlugin-SDK).
+Icon paths come from [Material Design Icons](https://pictogrammers.com/library/mdi/)
+(`@mdi/js` 7.4.47, Pictogrammers, Apache-2.0).

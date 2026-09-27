@@ -10,11 +10,31 @@
     .uspi-item-label { width: 116px; }
     .hint { padding: 4px 12px 8px; color: #969696; font-size: 11px; line-height: 1.4; }
     .reading { padding: 0 12px 6px; color: #cfcfcf; font-size: 12px; }
+    /* The SDK styles every <button> as a fixed 124x32 outline button. */
+    button.pi-button { flex: none; width: auto; height: 28px; padding: 0 10px; color: #eee; background: #303030; border: 1px solid #555; border-radius: 4px; font-size: 12px; cursor: pointer; }
+    button.pi-button:hover { background: #3b3b3b; border-color: #777; }
+    .icon-current { justify-content: flex-start; gap: 8px; }
+    .icon-swatch { flex: none; width: 32px; height: 32px; border-radius: 6px; background: #111827; display: flex; align-items: center; justify-content: center; }
+    .icon-swatch svg { width: 24px; height: 24px; }
+    .icon-swatch.empty { border: 1px dashed #555; background: transparent; }
+    .icon-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; color: #d1d5db; }
+    input[type="color"].uspi-item-value { width: 64px; padding: 2px; cursor: pointer; }
+    input[type="search"].uspi-item-value { font-size: 12px; }
+    .icon-status { width: 320px; min-height: 16px; color: #9ca3af; font-size: 11px; }
+    .icon-grid { width: 320px; max-height: 214px; overflow-y: auto; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; padding: 4px; background: #18191b; border-radius: 4px; }
+    .icon-grid:empty { display: none; }
+    button.icon-cell { display: flex; flex-direction: column; align-items: center; gap: 2px; width: auto; min-width: 0; height: auto; padding: 5px 2px 3px; color: #cbd5e1; background: #111827; border: 1px solid transparent; border-radius: 4px; cursor: pointer; }
+    button.icon-cell:focus-visible { outline: 1px solid #60a5fa; }
+    .icon-cell:hover { border-color: #4b5563; }
+    button.icon-cell.selected { border-color: var(--uspi-theme); }
+    .icon-cell svg { width: 26px; height: 26px; }
+    .icon-cell span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 9px; line-height: 12px; }
+    .glyph { fill: var(--icon-color, #facc15); }
   </style>
 </head>
 <body>
   <div class="uspi-wrapper hidden">
-    <form id="property-inspector">
+    <form id="property-inspector" autocomplete="off">
 
       <div class="uspi-item">
         <div class="uspi-item-label" data-localize="Brightness step">Brightness step</div>
@@ -28,20 +48,33 @@
 
       <div class="uspi-item">
         <div class="uspi-item-label" data-localize="Icon">Icon</div>
-        <select class="uspi-item-value select" name="icon" id="icon">
-          <option value="" data-localize="Keep Studio icon">Keep Studio icon</option>
-          <option value="brightness-5">Brightness 5</option>
-          <option value="brightness-6">Brightness 6</option>
-          <option value="brightness-7">Brightness 7</option>
-          <option value="weather-sunny">Weather sunny</option>
-          <option value="white-balance-sunny">White balance sunny</option>
-          <option value="theme-light-dark">Light / dark</option>
-          <option value="monitor">Monitor</option>
-          <option value="television">Television</option>
-          <option value="laptop">Laptop</option>
-          <option value="tune">Tune</option>
-          <option value="gauge">Gauge</option>
-        </select>
+        <div class="uspi-item-value icon-current">
+          <span class="icon-swatch empty" id="iconSwatch"></span>
+          <span class="icon-name" id="iconName"></span>
+          <button type="button" class="pi-button" id="iconClear" data-localize="Keep Studio icon">Keep Studio icon</button>
+        </div>
+        <input type="hidden" name="icon" id="icon" value="">
+      </div>
+
+      <div class="uspi-item">
+        <div class="uspi-item-label" data-localize="Icon colour">Icon colour</div>
+        <input class="uspi-item-value" type="color" name="iconColor" id="iconColor" value="#facc15">
+      </div>
+
+      <div class="uspi-item">
+        <div class="uspi-item-label" data-localize="Find icon">Find icon</div>
+        <input class="uspi-item-value" type="search" id="iconSearch" maxlength="64" spellcheck="false"
+               placeholder="lightbulb, sun, mdi:monitor" data-localize="IconSearchPlaceholder">
+      </div>
+
+      <div class="uspi-item">
+        <div class="uspi-item-label empty"></div>
+        <div class="icon-status" id="iconStatus" aria-live="polite"></div>
+      </div>
+
+      <div class="uspi-item">
+        <div class="uspi-item-label empty"></div>
+        <div class="icon-grid" id="iconGrid" role="listbox" aria-label="Icons"></div>
       </div>
 
       <div class="uspi-item">
@@ -54,8 +87,13 @@
       <div class="reading" id="reading"></div>
 
       <div class="uspi-item">
-        <div class="uspi-item-label">&nbsp;</div>
-        <button type="button" class="uspi-item-value" id="refresh" data-localize="Refresh monitors">Refresh monitors</button>
+        <div class="uspi-item-label empty"></div>
+        <button type="button" class="pi-button" id="refresh" data-localize="Refresh monitors">Refresh monitors</button>
+      </div>
+
+      <div class="hint" data-localize="IconHint">
+        Search covers the full Material Design Icons library; press Enter to use an exact name such as mdi:monitor.
+        The Brightness Display tile dims its icon colour with the monitor brightness.
       </div>
 
       <div class="hint" data-localize="DdcHint">

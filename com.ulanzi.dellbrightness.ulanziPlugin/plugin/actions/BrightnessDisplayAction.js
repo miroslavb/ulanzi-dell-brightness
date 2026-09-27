@@ -1,4 +1,16 @@
-import { BRIGHTNESS_ICONS, DEFAULT_BRIGHTNESS_ICON, brightnessIconDataUri } from '../icons.js';
+// Read-only Brightness Display tile. Settings:
+//   monitor   : "auto" | "<index>"
+//   icon      : any MDI name (with or without "mdi:"); "" or unknown -> brightness-7
+//   iconColor : "#rrggbb" (default #facc15); brightness is encoded as the
+//               glyph's colour intensity (see icons.js), unknown -> grey.
+
+import {
+  DEFAULT_BRIGHTNESS_ICON,
+  brightnessIconDataUri,
+  normalizeIconColor,
+  resolveIconPath
+} from '../icons.js';
+import { normalizeIconName } from '../mdiCatalog.js';
 
 const DEFAULT_POLL_INTERVAL_MS = 2000;
 
@@ -16,6 +28,7 @@ export default class BrightnessDisplayAction {
     this.pollIntervalMs = pollIntervalMs;
     this.monitor = 'auto';
     this.icon = DEFAULT_BRIGHTNESS_ICON;
+    this.iconColor = normalizeIconColor();
     this.active = true;
     this.pollTimer = null;
     this.renderSequence = 0;
@@ -24,8 +37,9 @@ export default class BrightnessDisplayAction {
   updateSettings(settings = {}) {
     this.monitor = settings.monitor === undefined || settings.monitor === null || settings.monitor === ''
       ? 'auto' : String(settings.monitor);
-    const requestedIcon = String(settings.icon || '').replace(/^mdi:/, '');
-    this.icon = BRIGHTNESS_ICONS[requestedIcon] ? requestedIcon : DEFAULT_BRIGHTNESS_ICON;
+    const requestedIcon = normalizeIconName(settings.icon);
+    this.icon = requestedIcon && resolveIconPath(requestedIcon) ? requestedIcon : DEFAULT_BRIGHTNESS_ICON;
+    this.iconColor = normalizeIconColor(settings.iconColor);
     this.startPolling();
     void this.refresh();
   }
@@ -68,7 +82,7 @@ export default class BrightnessDisplayAction {
     const current = result && result.ok ? result.current : null;
     this.$UD.setBaseDataIcon(
       this.context,
-      brightnessIconDataUri(this.icon, current, { showValue: true }),
+      brightnessIconDataUri(this.icon, current, { showValue: true, color: this.iconColor }),
       ''
     );
     return result;

@@ -15,7 +15,7 @@ const displayManifest = manifest.Actions.find(action =>
 );
 assert.ok(displayManifest, 'a dedicated current-brightness keypad action exists');
 assert.deepEqual(displayManifest.Controllers, ['Keypad']);
-assert.equal(manifest.Version, '1.2.1');
+assert.equal(manifest.Version, '1.3.0');
 
 const appSource = fs.readFileSync(new URL(
   '../com.ulanzi.dellbrightness.ulanziPlugin/plugin/app.js', import.meta.url
